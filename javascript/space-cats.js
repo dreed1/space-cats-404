@@ -9,13 +9,13 @@
   this.maximumVelocity = 30;
   this.userBrakeCoefficient = 0.95;
 
-  this.lazorRechargeTime = 400; //milliseconds
+  this.lazorRechargeTime = 600; //milliseconds
   this.lazorDefaultSpeed = 50;
   this.lazorsReady = true;
   this.userLazors = [];
 
   this.pizzas = [];
-  this.pizzaCount = 5;
+  this.pizzaCount = 3;
   this.pizzaDefaultSpeed = 8;
 
   this.leftPressed = false;
@@ -146,19 +146,20 @@
       var userCat = $('#user-cat'),
       leftMargin = parseInt($('#user-cat').css('margin-left').split('p').shift()),
       topMargin = parseInt($('#user-cat').css('margin-top').split('p').shift()),
+      userHeight = Math.max(parseInt(userCat.css('height').split('p').shift()), parseInt(userCat.css('width').split('p').shift()))
       screenWidth = document.width,
       screenHeight = document.height;
-      if(leftMargin > screenWidth) {
-        userCat.css({'margin-left': '0px'});
+      if(leftMargin > screenWidth + userHeight) {
+        userCat.css({'margin-left': -userHeight + 'px'});
       }
-      if(topMargin > screenHeight) {
-        userCat.css({'margin-top': '0px'});
+      if(topMargin > screenHeight + userHeight) {
+        userCat.css({'margin-top': -userHeight + 'px'});
       }
-      if(leftMargin < 0) {
-        userCat.css({'margin-left':screenWidth + 'px'});
+      if(leftMargin < 0 - userHeight) {
+        userCat.css({'margin-left': screenWidth + userHeight + 'px'});
       }
-      if(topMargin < 0) {
-        userCat.css({'margin-top': screenHeight + 'px'});
+      if(topMargin < 0 - userHeight) {
+        userCat.css({'margin-top': screenHeight + userHeight + 'px'});
       }
     }
 
@@ -216,19 +217,20 @@
       //kill it if it gets off screen
       leftMargin = parseInt(pizza.css('margin-left').split('p').shift()),
       topMargin = parseInt(pizza.css('margin-top').split('p').shift()),
+      pizzaDiameter = parseInt(pizza.css('height').split('p').shift()),
       screenWidth = document.width,
       screenHeight = document.height;
-      if(leftMargin > screenWidth) {
-        pizza.css({'margin-left': '0px'});
+      if(leftMargin > screenWidth + pizzaDiameter) {
+        pizza.css({'margin-left': -pizzaDiameter + 'px'});
       }
-      if(topMargin > screenHeight) {
-        pizza.css({'margin-top': '0px'});
+      if(topMargin > screenHeight + pizzaDiameter) {
+        pizza.css({'margin-top': -pizzaDiameter + 'px'});
       }
-      if(leftMargin < 0) {
-        pizza.css({'margin-left':screenWidth + 'px'});
+      if(leftMargin < 0 - pizzaDiameter) {
+        pizza.css({'margin-left':screenWidth + pizzaDiameter + 'px'});
       }
-      if(topMargin < 0) {
-        pizza.css({'margin-top': screenHeight + 'px'});
+      if(topMargin < 0 - pizzaDiameter) {
+        pizza.css({'margin-top': screenHeight + pizzaDiameter + 'px'});
       }
     }
     this.kill = function() {
