@@ -111,9 +111,17 @@
     function handleTurning() {
       if(_this.leftPressed) {
         $('#user-cat').css({'-webkit-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+        $('#user-cat').css({'-moz-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+        $('#user-cat').css({'-o-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+        $('#user-cat').css({'-ms-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+        $('#user-cat').css({'transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
       }
       if(_this.rightPressed) {
         $('#user-cat').css({'-webkit-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+        $('#user-cat').css({'-moz-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+        $('#user-cat').css({'-o-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+        $('#user-cat').css({'-ms-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+        $('#user-cat').css({'transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
       }
     }
 
@@ -187,6 +195,10 @@
     _this.userVelocity *= _this.userBrakeCoefficient;
   }
 
+  /*********************************************************************************/
+  /********************************PIZZA MODEL**************************************/
+  /*********************************************************************************/
+
   this.Pizza = function(opts) {
     var self = this;
     $.extend(this, {
@@ -234,7 +246,6 @@
       }
     }
     this.kill = function() {
-      console.log('killing pizza')
       $('#' + self.id).remove();
       var index = _this.pizzas.indexOf(self);
       _this.pizzas.splice(index,1);
@@ -245,6 +256,10 @@
     }
     self.init();
   }
+
+  /*********************************************************************************/
+  /********************************LAZOR MODEL**************************************/
+  /*********************************************************************************/
 
   this.Lazor = function(opts) {
     var self = this;
@@ -264,7 +279,11 @@
       $('#' + self.id).css({
         'margin-left': "+=" + self.positionX + "px",
         'margin-top': "+=" + self.positionY + "px",
-        '-webkit-transform': 'rotate(' + self.angle + 'deg)'
+        '-webkit-transform': 'rotate(' + self.angle + 'deg)',
+        '-moz-transform': 'rotate(' + self.angle + 'deg)',
+        '-ms-transform': 'rotate(' + self.angle + 'deg)',
+        '-o-transform': 'rotate(' + self.angle + 'deg)',
+        'transform': 'rotate(' + self.angle + 'deg)'
       })
     }
     this.move = function() {
