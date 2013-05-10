@@ -4,7 +4,7 @@
   this.userSpeedX = 0;
   this.userSpeedY = 0;
   this.userVelocity = 0;
-  this.userTurnSpeed = 6; // degrees
+  this.userTurnSpeed = 9; // degrees
   this.userAcceleration = 0.7;
   this.maximumVelocity = 30;
   this.userBrakeCoefficient = 0.95;
@@ -14,6 +14,10 @@
   this.lazorsReady = true;
   this.userLazors = [];
 
+  this.pizzas = [];
+  this.pizzaCount = 5;
+  this.pizzaDefaultSpeed = 8;
+
   this.leftPressed = false;
   this.rightPressed = false;
   this.upPressed = false;
@@ -22,6 +26,17 @@
 
   this.initializeSpaceCats = function() {
     _this.applyBindings();
+    $(document).ready(function() {
+      _this.createPizzas();
+    })
+  }
+
+  this.createPizzas = function() {
+    for(var i=0; i< _this.pizzaCount ; i++) {
+      _this.pizzas.push(new Pizza({
+
+      }));
+    }
   }
 
   this.applyBindings = function() {
@@ -158,7 +173,6 @@
         }
       }
       function fireLazor() {
-        console.log('bang!');
         _this.userLazors.push(new Lazor({
           angle: _this.getRotationDegrees($('#user-cat')),
           positionX: parseInt($('#user-cat').css('margin-left').split('p').shift()) + (parseInt($('#user-cat').css('width').split('p').shift())/2),
@@ -170,6 +184,64 @@
 
   this.bleedUserSpeed = function() {
     _this.userVelocity *= _this.userBrakeCoefficient;
+  }
+
+  this.Pizza = function(opts) {
+    var self = this;
+    $.extend(this, {
+      velocity: _this.pizzaDefaultSpeed,
+      angle: Math.floor(Math.random()*360),
+      positionX: Math.floor(Math.random()*document.width),
+      positionY: Math.floor(Math.random()*document.height)
+    },opts);
+
+    this.init = function() {
+      self.speedX = self.velocity * Math.cos(self.angle* Math.PI / 180);
+      self.speedY = self.velocity * Math.sin(self.angle* Math.PI / 180);
+      self.id = 'pizza-' + Math.floor(Math.random()*10000);
+      self.html = '<div class="pizza" id="' + self.id + '"></div>';
+      $('.space-background').append(self.html);
+      $('#' + self.id).css({
+        'margin-left': "+=" + self.positionX + "px",
+        'margin-top': "+=" + self.positionY + "px"
+      })
+    }
+    this.move = function() {
+      var pizza = $('#' + self.id);
+      pizza.css({
+        'margin-left': "+=" + self.speedX + "px",
+        'margin-top': "+=" + self.speedY + "px",
+      })
+
+      //kill it if it gets off screen
+      leftMargin = parseInt(pizza.css('margin-left').split('p').shift()),
+      topMargin = parseInt(pizza.css('margin-top').split('p').shift()),
+      screenWidth = document.width,
+      screenHeight = document.height;
+      if(leftMargin > screenWidth) {
+        pizza.css({'margin-left': '0px'});
+      }
+      if(topMargin > screenHeight) {
+        pizza.css({'margin-top': '0px'});
+      }
+      if(leftMargin < 0) {
+        pizza.css({'margin-left':screenWidth + 'px'});
+      }
+      if(topMargin < 0) {
+        pizza.css({'margin-top': screenHeight + 'px'});
+      }
+    }
+    this.kill = function() {
+      console.log('killing pizza')
+      $('#' + self.id).remove();
+      var index = _this.pizzas.indexOf(self);
+      _this.pizzas.splice(index,1);
+      //replace itself
+      _this.pizzas.push(new Pizza({
+
+      }));
+    }
+    self.init();
   }
 
   this.Lazor = function(opts) {
@@ -195,8 +267,6 @@
     }
     this.move = function() {
       var lazor = $('#' + self.id);
-      //console.log(lazor)
-      //console.log(lazor.css('margin-left'))
       lazor.css({
         'margin-left': "+=" + self.speedX + "px",
         'margin-top': "+=" + self.speedY + "px",
@@ -226,10 +296,18 @@
     }
   }
 
+  this.movePizzas = function() {
+    for(var i=0; i< _this.pizzas.length; i++){
+      var pizza = _this.pizzas[i];
+      pizza.move();
+    }
+  }
+
   this.loop = function() {
     _this.moveUser();
     _this.bleedUserSpeed();
     _this.moveLazors();
+    _this.movePizzas();
   }
 
   _this.initializeSpaceCats();
