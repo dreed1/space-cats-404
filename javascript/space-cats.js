@@ -9,13 +9,13 @@
   this.maximumVelocity = 30;
   this.userBrakeCoefficient = 0.95;
 
-  this.lazorRechargeTime = 600; //milliseconds
-  this.lazorDefaultSpeed = 50;
+  this.lazorRechargeTime = 100; //milliseconds
+  this.lazorDefaultSpeed = 10;
   this.lazorsReady = true;
   this.userLazors = [];
 
   this.pizzas = [];
-  this.pizzaCount = 3;
+  this.pizzaCount = 5;
   this.pizzaDefaultSpeed = 8;
 
   this.leftPressed = false;

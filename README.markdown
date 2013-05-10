@@ -8,3 +8,5 @@
 #DISCLAIMER: i haven't actually done the leg work for the collision detection, you'll only be able to *try* to kill the pizzas.
 
 Use this project for whatever you want, it'd tickle me pink if anyone actually pulled this into their project.
+
+![Looks like this:](/images/screenie.png "A Screenshot")
