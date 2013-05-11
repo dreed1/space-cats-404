@@ -45,7 +45,7 @@
       acceleration: 0.7,
       brakeCoefficient: 0.95,
       turnSpeed: 9,
-      angle: 0,
+      angle: 270,
       speedX: 0,
       speedY: 0,
       positionX: document.width/2,
@@ -237,12 +237,11 @@
     this.kill = function() {
       var index = _this.pizzas.indexOf(self);
       _this.pizzas.splice(index,1);
-      _this.pizzas.push(new Pizza({}));
+      //_this.pizzas.push(new Pizza({}));
     }
 
     this.collides = function(other_object) {
-      console.log('does this collide?')
-      return false;
+      return _this.doCollide(self, other_object);
     }
 
     self.init();
@@ -276,7 +275,7 @@
       topMargin = self.positionY,
       screenWidth = document.width,
       screenHeight = document.height;
-      if(leftMargin > screenWidth || topMargin > screenHeight || leftMargin < 0 || topMargin < 0) {
+      if((leftMargin > screenWidth || topMargin > screenHeight || leftMargin < 0 || topMargin < 0)) {
         self.kill();
       }
     }
@@ -290,8 +289,7 @@
     }
 
     this.collides = function(other_object) {
-      console.log('does this collide?')
-      return false;
+      return _this.doCollide(self, other_object);
     }
 
     self.init();
@@ -324,11 +322,31 @@
     _this.userCat.applyBindings();
   }
 
-  this.boundingBoxDimensions = function(width,height,angle){
-    var rads = angle*Math.PI/180;
-    var c = Math.abs(Math.cos(rads));
-    var s = Math.abs(Math.sin(rads));
-    return({  width: height * s + width * c,  height: height * c + width * s });
+  this.collides = function(object1, object2) {
+    var radius1 = Math.min(object1.height, object1.width);
+    var radius2 = Math.min(object2.height, object2.width);
+    var center1 = _this.findCenterOfRotatedRect(object1.positionX, object1.positionY, object1.width, object1.height, object1.angle);
+    var center2 = _this.findCenterOfRotatedRect(object2.positionX, object2.positionY, object2.width, object2.height, object2.angle);
+    if(_this.distanceBetweenTwoPoints(center1.x, center1.y, center2.x, center2.y) < radius1 + radius2) {
+      return true;
+    }
+    return false;
+  }
+
+  this.findCenterOfRotatedRect = function(x, y, width, height, angle_degrees) {
+    var angle_rad = angle_degrees * Math.PI / 180;
+    var cosa = Math.cos(angle_rad);
+    var sina = Math.sin(angle_rad);
+    var wp = width/2;
+    var hp = height/2;
+    return { x: ( x + wp * cosa - hp * sina ),
+             y: ( y + wp * sina + hp * cosa ) };
+  }
+
+  this.distanceBetweenTwoPoints = function(x1,y1, x2,y2) { 
+    var dx  = x1 - x2,
+      dy = y1 - y2;
+    return Math.sqrt( dx*dx + dy*dy ); 
   }
 
   this.drawRotatedImage = function(image, x, y, width, height, angle) {   
@@ -350,6 +368,7 @@
 
   this.loop = function() {
     _this.moveObjects();
+    _this.checkCollisions();
     _this.drawObjects();
   }
 
@@ -375,6 +394,17 @@
 
   this.moveCats = function() {
     _this.userCat.move();
+  }
+
+  this.checkCollisions = function() {
+    for(var i = 0; i < _this.pizzas.length; i++){
+      for(var j = 0; j < _this.userCat.lazors.length; j++){
+        if(_this.collides(_this.pizzas[i], _this.userCat.lazors[j])) {
+          _this.pizzas[i].kill();
+          _this.lazors[j].kill();
+        }
+      }
+    }
   }
 
   this.drawObjects = function() {
