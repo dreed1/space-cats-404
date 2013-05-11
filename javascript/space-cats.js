@@ -6,6 +6,7 @@
   this.pizzas = [];
   this.pizzaCount = 5;
   this.pizzaDefaultSpeed = 8;
+  this.pizzaSliceDefaultSpeed = 12;
 
   this.leftPressed = false;
   this.rightPressed = false;
@@ -199,6 +200,80 @@
       positionY: Math.floor(Math.random()*document.height),
       width: 80,
       height: 80,
+      rotation: 0
+    },opts);
+
+    this.init = function() {
+      self.draw();
+    }
+
+    this.move = function() {      
+      self.positionX += self.velocity * Math.cos(self.angle* Math.PI / 180);
+      self.positionY += self.velocity * Math.sin(self.angle* Math.PI / 180);
+      //self.angle += self.rotation;
+
+      //wrap screen
+      leftMargin = self.positionX,
+      topMargin = self.positionY,
+      pizzaDiameter = self.height,
+      screenWidth = document.width,
+      screenHeight = document.height;
+      if(leftMargin > screenWidth + pizzaDiameter) {
+        self.positionX =  -pizzaDiameter;
+      }
+      if(topMargin > screenHeight + pizzaDiameter) {
+        self.positionY =  -pizzaDiameter;
+      }
+      if(leftMargin < 0 - pizzaDiameter) {
+        self.positionX = screenWidth + pizzaDiameter;
+      }
+      if(topMargin < 0 - pizzaDiameter) {
+        self.positionY = screenHeight + pizzaDiameter;
+      }
+    }
+
+    this.draw = function() {
+      //_this.drawRotatedImage(pizzaImage, self.positionX, self.positionY, self.width, self.height, self.angle);
+      _this.context.drawImage(pizzaImage, self.positionX, self.positionY, self.width, self.height);
+    }
+
+    this.kill = function() {
+      var index = _this.pizzas.indexOf(self);
+      _this.pizzas.splice(index,1);
+      var childSlices = Math.max(3, Math.floor(Math.random()*8)),
+        i= 0;
+      do {
+        _this.pizzas.push(new PizzaSlice({
+          positionX: self.positionX,
+          positionY: self.positionY
+        }));
+        i++;
+      } while (i < childSlices)
+      
+      //_this.pizzas.push(new Pizza({}));
+    }
+
+    this.collides = function(other_object) {
+      return _this.doCollide(self, other_object);
+    }
+
+    self.init();
+  }
+
+  /*********************************************************************************/
+  /*****************************PIZZA SLICE MODEL***********************************/
+  /*********************************************************************************/
+
+  this.PizzaSlice = function(opts) {
+    var self = this;
+
+    $.extend(this, {
+      velocity: _this.pizzaSliceDefaultSpeed,
+      angle: Math.floor(Math.random()*360),
+      positionX: Math.floor(Math.random()*document.width),
+      positionY: Math.floor(Math.random()*document.height),
+      width: 40,
+      height: 40,
       rotation: 0
     },opts);
 
