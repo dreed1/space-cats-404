@@ -327,9 +327,19 @@
     var radius2 = Math.min(object2.height, object2.width);
     var center1 = _this.findCenterOfRotatedRect(object1.positionX, object1.positionY, object1.width, object1.height, object1.angle);
     var center2 = _this.findCenterOfRotatedRect(object2.positionX, object2.positionY, object2.width, object2.height, object2.angle);
+    console.log(object1)
+    console.log(radius1)
+    console.log(center1)
+    console.log(object2)
+    console.log(radius2)
+    console.log(center2)
+    console.log(_this.distanceBetweenTwoPoints(center1.x, center1.y, center2.x, center2.y) )
+    console.log(radius1 + radius2) 
     if(_this.distanceBetweenTwoPoints(center1.x, center1.y, center2.x, center2.y) < radius1 + radius2) {
+      console.log('trueruereuueueueueue')
       return true;
     }
+    console.log('f')
     return false;
   }
 
@@ -346,6 +356,7 @@
   this.distanceBetweenTwoPoints = function(x1,y1, x2,y2) { 
     var dx  = x1 - x2,
       dy = y1 - y2;
+      console.log( Math.sqrt( dx*dx + dy*dy ) )
     return Math.sqrt( dx*dx + dy*dy ); 
   }
 
@@ -367,8 +378,8 @@
   }
 
   this.loop = function() {
-    _this.moveObjects();
     _this.checkCollisions();
+    _this.moveObjects();
     _this.drawObjects();
   }
 
@@ -401,7 +412,7 @@
       for(var j = 0; j < _this.userCat.lazors.length; j++){
         if(_this.collides(_this.pizzas[i], _this.userCat.lazors[j])) {
           _this.pizzas[i].kill();
-          _this.lazors[j].kill();
+          _this.userCat.lazors[j].kill();
         }
       }
     }
