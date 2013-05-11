@@ -504,16 +504,32 @@
 
   this.drawObjects = function() {
     _this.drawBackground();
+    _this.drawHud();
     _this.drawPizzas();
     _this.drawLazors();
     _this.drawCats();
   }
 
+  this.drawHud = function() {
+    var healthBarWidth = 100,
+      healthBarHeight = 20,
+      healthBarPositionX = 10,
+      healthBarPositionY = 10;
+
+    _this.context.fillStyle = "rgb(250, 250, 250)";
+    _this.context.fillRect(healthBarPositionX-1, healthBarPositionY-1, healthBarWidth+2, healthBarHeight+2);
+    _this.context.fillStyle = "rgb(250,0,0)";
+    _this.context.fillRect(healthBarPositionX, healthBarPositionY, healthBarWidth, healthBarHeight);
+    _this.context.fillStyle = "rgb(250, 250, 250)";
+    _this.context.fonts = "5px helvetica";
+    _this.context.fillText("404 page not found",161,100);
+    _this.context.fillText("HP",healthBarPositionX+3, healthBarPositionY+(healthBarHeight/2));
+  }
+
+
   this.drawBackground = function() {
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.drawImage(backgroundImage, 0, 0, document.width, document.height);
-    _this.context.fonts = "5px helvetica";
-    _this.context.fillText("404 page not found",161,100);
   }
 
   this.drawCats = function() {
