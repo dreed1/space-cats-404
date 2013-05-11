@@ -12,7 +12,6 @@
   this.lazorRechargeTime = 100; //milliseconds
   this.lazorDefaultSpeed = 10;
   this.lazorsReady = true;
-  this.userLazors = [];
 
   this.pizzas = [];
   this.pizzaCount = 5;
@@ -24,175 +23,153 @@
   this.downPressed = false;
   this.firingLazors = false;
 
-  this.initializeSpaceCats = function() {
-    _this.applyBindings();
-    $(document).ready(function() {
-      _this.createPizzas();
-    })
-  }
+  /*********************************************************************************/
+  /*********************************USER MODEL**************************************/
+  /*********************************************************************************/
 
-  this.createPizzas = function() {
-    for(var i=0; i< _this.pizzaCount ; i++) {
-      _this.pizzas.push(new Pizza({
+  this.User = function() {
+    var self = this;
+    this.lazors = [];
 
-      }));
+    this.applyBindings = function() {
+      $(document).keydown(function (e) {
+        var keyCode = e.keyCode || e.which,
+          arrow = {left: 37, up: 38, right: 39, down: 40 };
+        switch (keyCode) {
+          case arrow.left:
+            _this.leftPressed = true;
+          break;
+          case arrow.up:
+            _this.upPressed = true;
+          break;
+          case arrow.right:
+            _this.rightPressed = true;
+          break;
+          case arrow.down:
+            _this.downPressed = true;
+          break;
+        }
+        if(e.keyCode == 32) {
+          _this.firingLazors = true;
+        }
+      });
+      $(document).keyup(function (e) {
+        var keyCode = e.keyCode || e.which,
+          arrow = {left: 37, up: 38, right: 39, down: 40 };
+        switch (keyCode) {
+          case arrow.left:
+            _this.leftPressed = false;
+          break;
+          case arrow.up:
+            _this.upPressed = false;
+          break;
+          case arrow.right:
+            _this.rightPressed = false;
+          break;
+          case arrow.down:
+            _this.downPressed = false;
+          break;
+        }
+        if(e.keyCode == 32) {
+          _this.firingLazors = false;
+        }
+      });
     }
-  }
+    this.move = function() {
+      handleTurning();
+      handleVelocity();
+      handleSpeed();
+      moveCat();
+      wrapScreen();
+      fireLazors();
 
-  this.applyBindings = function() {
-    //apply bindings to control your space cat with arrow keys
-    $(document).keydown(function (e) {
-      var keyCode = e.keyCode || e.which,
-        arrow = {left: 37, up: 38, right: 39, down: 40 };
-      switch (keyCode) {
-        case arrow.left:
-          _this.leftPressed = true;
-        break;
-        case arrow.up:
-          _this.upPressed = true;
-        break;
-        case arrow.right:
-          _this.rightPressed = true;
-        break;
-        case arrow.down:
-          _this.downPressed = true;
-        break;
-      }
-      if(e.keyCode == 32) {
-        _this.firingLazors = true;
-      }
-    });
-    $(document).keyup(function (e) {
-      var keyCode = e.keyCode || e.which,
-        arrow = {left: 37, up: 38, right: 39, down: 40 };
-      switch (keyCode) {
-        case arrow.left:
-          _this.leftPressed = false;
-        break;
-        case arrow.up:
-          _this.upPressed = false;
-        break;
-        case arrow.right:
-          _this.rightPressed = false;
-        break;
-        case arrow.down:
-          _this.downPressed = false;
-        break;
-      }
-      if(e.keyCode == 32) {
-        _this.firingLazors = false;
-      }
-    });
-  }
-
-  this.getRotationDegrees = function(obj) {
-    var matrix = obj.css("-webkit-transform") ||
-    obj.css("-moz-transform")    ||
-    obj.css("-ms-transform")     ||
-    obj.css("-o-transform")      ||
-    obj.css("transform");
-    if(matrix !== 'none') {
-        var values = matrix.split('(')[1].split(')')[0].split(',');
-        var a = values[0];
-        var b = values[1];
-        var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
-    } else { var angle = 0; }
-    return angle;
-  }
-
-  this.moveUser = function() {
-    handleTurning();
-    handleVelocity();
-    handleSpeed();
-    moveCat();
-    wrapScreen();
-    fireLazors();
-
-    function handleTurning() {
-      if(_this.leftPressed) {
-        $('#user-cat').css({'-webkit-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-        $('#user-cat').css({'-moz-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-        $('#user-cat').css({'-o-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-        $('#user-cat').css({'-ms-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-        $('#user-cat').css({'transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-      }
-      if(_this.rightPressed) {
-        $('#user-cat').css({'-webkit-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-        $('#user-cat').css({'-moz-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-        $('#user-cat').css({'-o-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-        $('#user-cat').css({'-ms-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-        $('#user-cat').css({'transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-      }
-    }
-
-    function handleVelocity() {
-      if(_this.upPressed) {
-        _this.userVelocity += _this.userAcceleration;
-        if(_this.userVelocity > _this.maximumVelocity) _this.userVelocity = _this.maximumVelocity;
-      }
-      if(this.downPressed) {
-        _this.userVelocity -= _this.userAcceleration;
-        if(_this.userVelocity > _this.maximumVelocity) _this.userVelocity = _this.maximumVelocity;
-      }
-    }
-
-    function handleSpeed() {
-      var angle = _this.getRotationDegrees($('#user-cat'));
-      _this.userSpeedX = this.userVelocity * Math.cos(angle* Math.PI / 180);
-      _this.userSpeedY = this.userVelocity * Math.sin(angle* Math.PI / 180);
-    }
-
-    function moveCat() {
-      var userCat = $('#user-cat');
-      userCat.css({
-        'margin-left': "+=" + _this.userSpeedX + "px",
-        'margin-top': "+=" + _this.userSpeedY + "px",
-      })
-    }
-
-    function wrapScreen() {
-      var userCat = $('#user-cat'),
-      leftMargin = parseInt($('#user-cat').css('margin-left').split('p').shift()),
-      topMargin = parseInt($('#user-cat').css('margin-top').split('p').shift()),
-      userHeight = Math.max(parseInt(userCat.css('height').split('p').shift()), parseInt(userCat.css('width').split('p').shift()))
-      screenWidth = document.width,
-      screenHeight = document.height;
-      if(leftMargin > screenWidth + userHeight) {
-        userCat.css({'margin-left': -userHeight + 'px'});
-      }
-      if(topMargin > screenHeight + userHeight) {
-        userCat.css({'margin-top': -userHeight + 'px'});
-      }
-      if(leftMargin < 0 - userHeight) {
-        userCat.css({'margin-left': screenWidth + userHeight + 'px'});
-      }
-      if(topMargin < 0 - userHeight) {
-        userCat.css({'margin-top': screenHeight + userHeight + 'px'});
-      }
-    }
-
-    function fireLazors() {
-      if(firingLazors) {
-        if(_this.lazorsReady) {
-          fireLazor();
-          _this.lazorsReady = false;
-          window.setTimeout(function() {
-            _this.lazorsReady = true;
-          },_this.lazorRechargeTime);
+      function handleTurning() {
+        if(_this.leftPressed) {
+          $('#user-cat').css({'-webkit-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+          $('#user-cat').css({'-moz-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+          $('#user-cat').css({'-o-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+          $('#user-cat').css({'-ms-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+          $('#user-cat').css({'transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+        }
+        if(_this.rightPressed) {
+          $('#user-cat').css({'-webkit-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+          $('#user-cat').css({'-moz-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+          $('#user-cat').css({'-o-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+          $('#user-cat').css({'-ms-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+          $('#user-cat').css({'transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
         }
       }
-      function fireLazor() {
-        _this.userLazors.push(new Lazor({
-          angle: _this.getRotationDegrees($('#user-cat')),
-          positionX: parseInt($('#user-cat').css('margin-left').split('p').shift()) + (parseInt($('#user-cat').css('width').split('p').shift())/2),
-          positionY: parseInt($('#user-cat').css('margin-top').split('p').shift() + (parseInt($('#user-cat').css('height').split('p').shift())/2))
-        }));
+
+      function handleVelocity() {
+        if(_this.upPressed) {
+          _this.userVelocity += _this.userAcceleration;
+          if(_this.userVelocity > _this.maximumVelocity) _this.userVelocity = _this.maximumVelocity;
+        }
+        if(this.downPressed) {
+          _this.userVelocity -= _this.userAcceleration;
+          if(_this.userVelocity > _this.maximumVelocity) _this.userVelocity = _this.maximumVelocity;
+        }
+      }
+
+      function handleSpeed() {
+        var angle = _this.getRotationDegrees($('#user-cat'));
+        _this.userSpeedX = this.userVelocity * Math.cos(angle* Math.PI / 180);
+        _this.userSpeedY = this.userVelocity * Math.sin(angle* Math.PI / 180);
+      }
+
+      function moveCat() {
+        var userCat = $('#user-cat');
+        userCat.css({
+          'margin-left': "+=" + _this.userSpeedX + "px",
+          'margin-top': "+=" + _this.userSpeedY + "px",
+        })
+        self.decelerate();
+      }
+
+      function wrapScreen() {
+        var userCat = $('#user-cat'),
+        leftMargin = parseInt($('#user-cat').css('margin-left').split('p').shift()),
+        topMargin = parseInt($('#user-cat').css('margin-top').split('p').shift()),
+        userHeight = Math.max(parseInt(userCat.css('height').split('p').shift()), parseInt(userCat.css('width').split('p').shift()))
+        screenWidth = document.width,
+        screenHeight = document.height;
+        if(leftMargin > screenWidth + userHeight) {
+          userCat.css({'margin-left': -userHeight + 'px'});
+        }
+        if(topMargin > screenHeight + userHeight) {
+          userCat.css({'margin-top': -userHeight + 'px'});
+        }
+        if(leftMargin < 0 - userHeight) {
+          userCat.css({'margin-left': screenWidth + userHeight + 'px'});
+        }
+        if(topMargin < 0 - userHeight) {
+          userCat.css({'margin-top': screenHeight + userHeight + 'px'});
+        }
+      }
+
+      function fireLazors() {
+        if(firingLazors) {
+          if(_this.lazorsReady) {
+            fireLazor();
+            _this.lazorsReady = false;
+            window.setTimeout(function() {
+              _this.lazorsReady = true;
+            },_this.lazorRechargeTime);
+          }
+        }
+        function fireLazor() {
+          _this.userCat.lazors.push(new Lazor({
+            angle: _this.getRotationDegrees($('#user-cat')),
+            positionX: parseInt($('#user-cat').css('margin-left').split('p').shift()) + (parseInt($('#user-cat').css('width').split('p').shift())/2),
+            positionY: parseInt($('#user-cat').css('margin-top').split('p').shift() + (parseInt($('#user-cat').css('height').split('p').shift())/2))
+          }));
+        }
       }
     }
-  }
 
-  this.bleedUserSpeed = function() {
-    _this.userVelocity *= _this.userBrakeCoefficient;
+    this.decelerate = function() {
+      _this.userVelocity *= _this.userBrakeCoefficient;
+    }
   }
 
   /*********************************************************************************/
@@ -208,6 +185,8 @@
       positionY: Math.floor(Math.random()*document.height)
     },opts);
 
+    self.element;
+
     this.init = function() {
       self.speedX = self.velocity * Math.cos(self.angle* Math.PI / 180);
       self.speedY = self.velocity * Math.sin(self.angle* Math.PI / 180);
@@ -218,31 +197,31 @@
         'margin-left': "+=" + self.positionX + "px",
         'margin-top': "+=" + self.positionY + "px"
       })
+      self.element = $('#' + self.id);
     }
     this.move = function() {
-      var pizza = $('#' + self.id);
-      pizza.css({
+      self.element.css({
         'margin-left': "+=" + self.speedX + "px",
         'margin-top': "+=" + self.speedY + "px",
       })
 
       //kill it if it gets off screen
-      leftMargin = parseInt(pizza.css('margin-left').split('p').shift()),
-      topMargin = parseInt(pizza.css('margin-top').split('p').shift()),
-      pizzaDiameter = parseInt(pizza.css('height').split('p').shift()),
+      leftMargin = parseInt(self.element.css('margin-left').split('p').shift()),
+      topMargin = parseInt(self.element.css('margin-top').split('p').shift()),
+      pizzaDiameter = parseInt(self.element.css('height').split('p').shift()),
       screenWidth = document.width,
       screenHeight = document.height;
       if(leftMargin > screenWidth + pizzaDiameter) {
-        pizza.css({'margin-left': -pizzaDiameter + 'px'});
+        self.element.css({'margin-left': -pizzaDiameter + 'px'});
       }
       if(topMargin > screenHeight + pizzaDiameter) {
-        pizza.css({'margin-top': -pizzaDiameter + 'px'});
+        self.element.css({'margin-top': -pizzaDiameter + 'px'});
       }
       if(leftMargin < 0 - pizzaDiameter) {
-        pizza.css({'margin-left':screenWidth + pizzaDiameter + 'px'});
+        self.element.css({'margin-left':screenWidth + pizzaDiameter + 'px'});
       }
       if(topMargin < 0 - pizzaDiameter) {
-        pizza.css({'margin-top': screenHeight + pizzaDiameter + 'px'});
+        self.element.css({'margin-top': screenHeight + pizzaDiameter + 'px'});
       }
     }
     this.kill = function() {
@@ -250,9 +229,7 @@
       var index = _this.pizzas.indexOf(self);
       _this.pizzas.splice(index,1);
       //replace itself
-      _this.pizzas.push(new Pizza({
-
-      }));
+      _this.pizzas.push(new Pizza({}));
     }
     self.init();
   }
@@ -270,6 +247,8 @@
       positionY: 0
     },opts);
 
+    self.element;
+
     this.init = function() {
       self.speedX = self.velocity * Math.cos(self.angle* Math.PI / 180);
       self.speedY = self.velocity * Math.sin(self.angle* Math.PI / 180);
@@ -284,18 +263,18 @@
         '-ms-transform': 'rotate(' + self.angle + 'deg)',
         '-o-transform': 'rotate(' + self.angle + 'deg)',
         'transform': 'rotate(' + self.angle + 'deg)'
-      })
+      });
+      self.element = $('#' + self.id);
     }
     this.move = function() {
-      var lazor = $('#' + self.id);
-      lazor.css({
+      self.element.css({
         'margin-left': "+=" + self.speedX + "px",
         'margin-top': "+=" + self.speedY + "px",
       })
 
       //kill it if it gets off screen
-      leftMargin = parseInt(lazor.css('margin-left').split('p').shift()),
-      topMargin = parseInt(lazor.css('margin-top').split('p').shift()),
+      leftMargin = parseInt(self.element.css('margin-left').split('p').shift()),
+      topMargin = parseInt(self.element.css('margin-top').split('p').shift()),
       screenWidth = document.width,
       screenHeight = document.height;
       if(leftMargin > screenWidth || topMargin > screenHeight || leftMargin < 0 || topMargin < 0) {
@@ -303,16 +282,54 @@
       }
     }
     this.kill = function() {
-      $('#' + self.id).remove();
-      var index = _this.userLazors.indexOf(self);
-      _this.userLazors.splice(index,1);
+      self.element.remove();
+      var index = _this.userCat.lazors.indexOf(self);
+      _this.userCat.lazors.splice(index,1);
     }
     self.init();
   }
 
+  /*********************************************************************************/
+  /*********************************VIEW MODEL**************************************/
+  /*********************************************************************************/
+
+  this.initializeSpaceCats = function() {
+    _this.userCat = new User();
+    _this.applyBindings();
+    $(document).ready(function() {
+      _this.createPizzas();
+    })
+  }
+
+  this.createPizzas = function() {
+    for(var i=0; i< _this.pizzaCount ; i++) {
+      _this.pizzas.push(new Pizza({}));
+    }
+  }
+
+  this.applyBindings = function() {
+    //apply bindings to control your space cat with arrow keys
+    _this.userCat.applyBindings();
+  }
+
+  this.getRotationDegrees = function(obj) {
+    var matrix = obj.css("-webkit-transform") ||
+    obj.css("-moz-transform")    ||
+    obj.css("-ms-transform")     ||
+    obj.css("-o-transform")      ||
+    obj.css("transform");
+    if(matrix !== 'none') {
+        var values = matrix.split('(')[1].split(')')[0].split(',');
+        var a = values[0];
+        var b = values[1];
+        var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+    } else { var angle = 0; }
+    return angle;
+  }
+
   this.moveLazors = function() {
-    for(var i=0; i< _this.userLazors.length; i++){
-      var lazor = _this.userLazors[i];
+    for(var i=0; i< _this.userCat.lazors.length; i++){
+      var lazor = _this.userCat.lazors[i];
       lazor.move();
     }
   }
@@ -325,8 +342,7 @@
   }
 
   this.loop = function() {
-    _this.moveUser();
-    _this.bleedUserSpeed();
+    _this.userCat.move();
     _this.moveLazors();
     _this.movePizzas();
   }
