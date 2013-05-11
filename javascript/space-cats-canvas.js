@@ -239,6 +239,12 @@
       _this.pizzas.splice(index,1);
       _this.pizzas.push(new Pizza({}));
     }
+
+    this.collides = function(other_object) {
+      console.log('does this collide?')
+      return false;
+    }
+
     self.init();
   }
 
@@ -282,6 +288,12 @@
       var index = _this.userCat.lazors.indexOf(self);
       _this.userCat.lazors.splice(index,1);
     }
+
+    this.collides = function(other_object) {
+      console.log('does this collide?')
+      return false;
+    }
+
     self.init();
   }
 
@@ -310,6 +322,13 @@
   this.applyBindings = function() {
     //apply bindings to control your space cat with arrow keys
     _this.userCat.applyBindings();
+  }
+
+  this.boundingBoxDimensions = function(width,height,angle){
+    var rads = angle*Math.PI/180;
+    var c = Math.abs(Math.cos(rads));
+    var s = Math.abs(Math.sin(rads));
+    return({  width: height * s + width * c,  height: height * c + width * s });
   }
 
   this.drawRotatedImage = function(image, x, y, width, height, angle) {   
@@ -368,6 +387,8 @@
   this.drawBackground = function() {
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.drawImage(backgroundImage, 0, 0, document.width, document.height);
+    _this.context.fonts = "5px helvetica";
+    _this.context.fillText("404 page not found",10,50);
   }
 
   this.drawCats = function() {
