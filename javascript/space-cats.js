@@ -388,7 +388,7 @@
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.drawImage(backgroundImage, 0, 0, document.width, document.height);
     _this.context.fonts = "5px helvetica";
-    _this.context.fillText("404 page not found",10,50);
+    _this.context.fillText("404 page not found",161,100);
   }
 
   this.drawCats = function() {
