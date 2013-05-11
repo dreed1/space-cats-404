@@ -1,20 +1,8 @@
 (function() {
   var _this = this;
 
-  this.userSpeedX = 0;
-  this.userSpeedY = 0;
-  this.userVelocity = 0;
-  this.userTurnSpeed = 9; // degrees
-  this.userAcceleration = 0.7;
-  this.maximumVelocity = 30;
-  this.userBrakeCoefficient = 0.95;
-
-  this.lazorRechargeTime = 100; //milliseconds
-  this.lazorDefaultSpeed = 10;
-  this.lazorsReady = true;
-
   this.pizzas = [];
-  this.pizzaCount = 5;
+  this.pizzaCount = 25;
   this.pizzaDefaultSpeed = 8;
 
   this.leftPressed = false;
@@ -23,13 +11,52 @@
   this.downPressed = false;
   this.firingLazors = false;
 
+  var pizzaReady = false;
+  var pizzaImage = new Image();
+  pizzaImage.onload = function () {
+    pizzaReady = true;
+  };
+  pizzaImage.src = "images/pizza.png";
+
+  var userReady = false;
+  var userImage = new Image();
+  userImage.onload = function () {
+    userReady = true;
+  };
+  userImage.src = "images/catstronaut.png";
+
+  var backgroundReady = false;
+  var backgroundImage = new Image();
+  backgroundImage.onload = function () {
+    backgroundReady = true;
+  };
+  backgroundImage.src = "images/bkgd-bluehorsehead_rosen_2048.jpg";
+
   /*********************************************************************************/
   /*********************************USER MODEL**************************************/
   /*********************************************************************************/
 
-  this.User = function() {
+  this.User = function(opts) {
     var self = this;
-    this.lazors = [];
+
+    $.extend(this, {
+      velocity: 0,
+      maximumVelocity: 30,
+      acceleration: 0.7,
+      brakeCoefficient: 0.95,
+      turnSpeed: 9,
+      angle: 0,
+      speedX: 0,
+      speedY: 0,
+      positionX: document.width/2,
+      positionY: document.height/2,
+      width: 130,
+      height: 70,
+      lazorRechargeTime: 100, //milliseconds
+      lazorDefaultVelocity: 10,
+      lazorsReady: true,
+      lazors: []
+    },opts);
 
     this.applyBindings = function() {
       $(document).keydown(function (e) {
@@ -78,97 +105,81 @@
     this.move = function() {
       handleTurning();
       handleVelocity();
-      handleSpeed();
       moveCat();
       wrapScreen();
       fireLazors();
 
       function handleTurning() {
         if(_this.leftPressed) {
-          $('#user-cat').css({'-webkit-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-          $('#user-cat').css({'-moz-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-          $('#user-cat').css({'-o-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-          $('#user-cat').css({'-ms-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
-          $('#user-cat').css({'transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) - _this.userTurnSpeed) + 'deg)'});
+          self.angle -= self.turnSpeed;
         }
         if(_this.rightPressed) {
-          $('#user-cat').css({'-webkit-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-          $('#user-cat').css({'-moz-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-          $('#user-cat').css({'-o-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-          $('#user-cat').css({'-ms-transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
-          $('#user-cat').css({'transform': 'rotate(' + (_this.getRotationDegrees($('#user-cat')) + _this.userTurnSpeed) + 'deg)'});
+          self.angle += self.turnSpeed;
         }
       }
 
       function handleVelocity() {
         if(_this.upPressed) {
-          _this.userVelocity += _this.userAcceleration;
-          if(_this.userVelocity > _this.maximumVelocity) _this.userVelocity = _this.maximumVelocity;
+          self.velocity += self.acceleration;
+          if(self.velocity > self.maximumVelocity) self.velocity = self.maximumVelocity;
         }
-        if(this.downPressed) {
-          _this.userVelocity -= _this.userAcceleration;
-          if(_this.userVelocity > _this.maximumVelocity) _this.userVelocity = _this.maximumVelocity;
+        if(_this.downPressed) {
+          self.velocity -= self.acceleration;
+          if(self.velocity > self.maximumVelocity) self.velocity = self.maximumVelocity;
         }
-      }
-
-      function handleSpeed() {
-        var angle = _this.getRotationDegrees($('#user-cat'));
-        _this.userSpeedX = this.userVelocity * Math.cos(angle* Math.PI / 180);
-        _this.userSpeedY = this.userVelocity * Math.sin(angle* Math.PI / 180);
       }
 
       function moveCat() {
-        var userCat = $('#user-cat');
-        userCat.css({
-          'margin-left': "+=" + _this.userSpeedX + "px",
-          'margin-top': "+=" + _this.userSpeedY + "px",
-        })
-        self.decelerate();
+        self.positionX += self.velocity * Math.cos(self.angle* Math.PI / 180);
+        self.positionY += self.velocity * Math.sin(self.angle* Math.PI / 180);
+        
+        //decelerate
+        self.velocity *= self.brakeCoefficient;
       }
 
       function wrapScreen() {
-        var userCat = $('#user-cat'),
-        leftMargin = parseInt($('#user-cat').css('margin-left').split('p').shift()),
-        topMargin = parseInt($('#user-cat').css('margin-top').split('p').shift()),
-        userHeight = Math.max(parseInt(userCat.css('height').split('p').shift()), parseInt(userCat.css('width').split('p').shift()))
+        var leftMargin = self.positionX,
+        topMargin = self.positionY,
+        userHeight = Math.max(self.height, self.width)
         screenWidth = document.width,
         screenHeight = document.height;
         if(leftMargin > screenWidth + userHeight) {
-          userCat.css({'margin-left': -userHeight + 'px'});
+          self.positionX = -userHeight;
         }
         if(topMargin > screenHeight + userHeight) {
-          userCat.css({'margin-top': -userHeight + 'px'});
+          self.positionY = -userHeight;
         }
         if(leftMargin < 0 - userHeight) {
-          userCat.css({'margin-left': screenWidth + userHeight + 'px'});
+          self.positionX = screenWidth + userHeight;
         }
         if(topMargin < 0 - userHeight) {
-          userCat.css({'margin-top': screenHeight + userHeight + 'px'});
+          self.positionY = screenHeight + userHeight;
         }
       }
 
       function fireLazors() {
-        if(firingLazors) {
-          if(_this.lazorsReady) {
+        if(_this.firingLazors) {
+          if(self.lazorsReady) {
             fireLazor();
-            _this.lazorsReady = false;
+            self.lazorsReady = false;
             window.setTimeout(function() {
-              _this.lazorsReady = true;
-            },_this.lazorRechargeTime);
+              self.lazorsReady = true;
+            },self.lazorRechargeTime);
           }
         }
         function fireLazor() {
-          _this.userCat.lazors.push(new Lazor({
-            angle: _this.getRotationDegrees($('#user-cat')),
-            positionX: parseInt($('#user-cat').css('margin-left').split('p').shift()) + (parseInt($('#user-cat').css('width').split('p').shift())/2),
-            positionY: parseInt($('#user-cat').css('margin-top').split('p').shift() + (parseInt($('#user-cat').css('height').split('p').shift())/2))
+          self.lazors.push(new Lazor({
+            angle: self.angle,
+            positionX: self.positionX,
+            positionY: self.positionY,
+            velocity: self.velocity + self.lazorDefaultVelocity
           }));
         }
       }
     }
 
-    this.decelerate = function() {
-      _this.userVelocity *= _this.userBrakeCoefficient;
+    this.draw = function() {
+      _this.drawRotatedImage(userImage, self.positionX, self.positionY, self.width, self.height, self.angle);
     }
   }
 
@@ -178,59 +189,62 @@
 
   this.Pizza = function(opts) {
     var self = this;
+
     $.extend(this, {
       velocity: _this.pizzaDefaultSpeed,
       angle: Math.floor(Math.random()*360),
       positionX: Math.floor(Math.random()*document.width),
-      positionY: Math.floor(Math.random()*document.height)
+      positionY: Math.floor(Math.random()*document.height),
+      width: 80,
+      height: 80,
+      rotation: Math.floor(Math.random() * 8)
     },opts);
 
-    self.element;
-
     this.init = function() {
-      self.speedX = self.velocity * Math.cos(self.angle* Math.PI / 180);
-      self.speedY = self.velocity * Math.sin(self.angle* Math.PI / 180);
-      self.id = 'pizza-' + Math.floor(Math.random()*10000);
-      self.html = '<div class="pizza" id="' + self.id + '"></div>';
-      $('.space-background').append(self.html);
-      $('#' + self.id).css({
-        'margin-left': "+=" + self.positionX + "px",
-        'margin-top': "+=" + self.positionY + "px"
-      })
-      self.element = $('#' + self.id);
+      self.draw();
     }
-    this.move = function() {
-      self.element.css({
-        'margin-left': "+=" + self.speedX + "px",
-        'margin-top': "+=" + self.speedY + "px",
-      })
 
-      //kill it if it gets off screen
-      leftMargin = parseInt(self.element.css('margin-left').split('p').shift()),
-      topMargin = parseInt(self.element.css('margin-top').split('p').shift()),
-      pizzaDiameter = parseInt(self.element.css('height').split('p').shift()),
+    this.move = function() {      
+      self.positionX += self.velocity * Math.cos(self.angle* Math.PI / 180);
+      self.positionY += self.velocity * Math.sin(self.angle* Math.PI / 180);
+      //self.angle += self.rotation;
+
+      //wrap screen
+      leftMargin = self.positionX,
+      topMargin = self.positionY,
+      pizzaDiameter = self.height,
       screenWidth = document.width,
       screenHeight = document.height;
       if(leftMargin > screenWidth + pizzaDiameter) {
-        self.element.css({'margin-left': -pizzaDiameter + 'px'});
+        self.positionX =  -pizzaDiameter;
       }
       if(topMargin > screenHeight + pizzaDiameter) {
-        self.element.css({'margin-top': -pizzaDiameter + 'px'});
+        self.positionY =  -pizzaDiameter;
       }
       if(leftMargin < 0 - pizzaDiameter) {
-        self.element.css({'margin-left':screenWidth + pizzaDiameter + 'px'});
+        self.positionX = screenWidth + pizzaDiameter;
       }
       if(topMargin < 0 - pizzaDiameter) {
-        self.element.css({'margin-top': screenHeight + pizzaDiameter + 'px'});
+        self.positionY = screenHeight + pizzaDiameter;
       }
     }
+
+    this.draw = function() {
+      //_this.drawRotatedImage(pizzaImage, self.positionX, self.positionY, self.width, self.height, self.angle);
+      _this.context.drawImage(pizzaImage, self.positionX, self.positionY, self.width, self.height);
+    }
+
     this.kill = function() {
-      $('#' + self.id).remove();
       var index = _this.pizzas.indexOf(self);
       _this.pizzas.splice(index,1);
-      //replace itself
       _this.pizzas.push(new Pizza({}));
     }
+
+    this.collides = function(other_object) {
+      console.log('does this collide?')
+      return false;
+    }
+
     self.init();
   }
 
@@ -241,51 +255,45 @@
   this.Lazor = function(opts) {
     var self = this;
     $.extend(this, {
-      velocity: _this.lazorDefaultSpeed,
+      velocity: _this.userCat.lazorDefaultVelocity,
       angle: 0,
       positionX: 0,
-      positionY: 0
+      positionY: 0,
+      width: 10,
+      height: 2
     },opts);
-
-    self.element;
 
     this.init = function() {
       self.speedX = self.velocity * Math.cos(self.angle* Math.PI / 180);
       self.speedY = self.velocity * Math.sin(self.angle* Math.PI / 180);
-      self.id = 'lazor-' + Math.floor(Math.random()*10000);
-      self.html = '<div class="lazor" id="' + self.id + '"></div>';
-      $('.space-background').append(self.html);
-      $('#' + self.id).css({
-        'margin-left': "+=" + self.positionX + "px",
-        'margin-top': "+=" + self.positionY + "px",
-        '-webkit-transform': 'rotate(' + self.angle + 'deg)',
-        '-moz-transform': 'rotate(' + self.angle + 'deg)',
-        '-ms-transform': 'rotate(' + self.angle + 'deg)',
-        '-o-transform': 'rotate(' + self.angle + 'deg)',
-        'transform': 'rotate(' + self.angle + 'deg)'
-      });
-      self.element = $('#' + self.id);
     }
     this.move = function() {
-      self.element.css({
-        'margin-left': "+=" + self.speedX + "px",
-        'margin-top': "+=" + self.speedY + "px",
-      })
+      self.positionX += self.speedX;
+      self.positionY += self.speedY;
 
       //kill it if it gets off screen
-      leftMargin = parseInt(self.element.css('margin-left').split('p').shift()),
-      topMargin = parseInt(self.element.css('margin-top').split('p').shift()),
+      leftMargin = self.positionX,
+      topMargin = self.positionY,
       screenWidth = document.width,
       screenHeight = document.height;
       if(leftMargin > screenWidth || topMargin > screenHeight || leftMargin < 0 || topMargin < 0) {
         self.kill();
       }
     }
+    this.draw = function() {
+      _this.drawRotatedRect(self.positionX, self.positionY, self.width, self.height, self.angle);
+    }
+
     this.kill = function() {
-      self.element.remove();
       var index = _this.userCat.lazors.indexOf(self);
       _this.userCat.lazors.splice(index,1);
     }
+
+    this.collides = function(other_object) {
+      console.log('does this collide?')
+      return false;
+    }
+
     self.init();
   }
 
@@ -297,8 +305,12 @@
     _this.userCat = new User();
     _this.applyBindings();
     $(document).ready(function() {
+      _this.canvas = document.getElementById('space-canvas');
+      _this.canvas.height = document.height;
+      _this.canvas.width = document.width;
+      _this.context = canvas.getContext('2d');
       _this.createPizzas();
-    })
+    });
   }
 
   this.createPizzas = function() {
@@ -312,19 +324,39 @@
     _this.userCat.applyBindings();
   }
 
-  this.getRotationDegrees = function(obj) {
-    var matrix = obj.css("-webkit-transform") ||
-    obj.css("-moz-transform")    ||
-    obj.css("-ms-transform")     ||
-    obj.css("-o-transform")      ||
-    obj.css("transform");
-    if(matrix !== 'none') {
-        var values = matrix.split('(')[1].split(')')[0].split(',');
-        var a = values[0];
-        var b = values[1];
-        var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
-    } else { var angle = 0; }
-    return angle;
+  this.boundingBoxDimensions = function(width,height,angle){
+    var rads = angle*Math.PI/180;
+    var c = Math.abs(Math.cos(rads));
+    var s = Math.abs(Math.sin(rads));
+    return({  width: height * s + width * c,  height: height * c + width * s });
+  }
+
+  this.drawRotatedImage = function(image, x, y, width, height, angle) {   
+    _this.context.save(); 
+    _this.context.translate(x, y);
+    _this.context.rotate(angle * Math.PI/180);
+    _this.context.drawImage(image, -(width/2), -(height/2), width, height);
+    _this.context.restore(); 
+  }
+
+  this.drawRotatedRect = function(x, y, width, height, angle) {   
+    _this.context.save(); 
+    _this.context.fillStyle = "rgb(250, 0, 0)";
+    _this.context.translate(x, y);
+    _this.context.rotate(angle * Math.PI/180);
+    _this.context.fillRect(-(width/2), -(height/2), width, height);
+    _this.context.restore(); 
+  }
+
+  this.loop = function() {
+    _this.moveObjects();
+    _this.drawObjects();
+  }
+
+  this.moveObjects = function() {
+    _this.moveCats();
+    _this.moveLazors();
+    _this.movePizzas();
   }
 
   this.moveLazors = function() {
@@ -341,10 +373,38 @@
     }
   }
 
-  this.loop = function() {
+  this.moveCats = function() {
     _this.userCat.move();
-    _this.moveLazors();
-    _this.movePizzas();
+  }
+
+  this.drawObjects = function() {
+    _this.drawBackground();
+    _this.drawPizzas();
+    _this.drawLazors();
+    _this.drawCats();
+  }
+
+  this.drawBackground = function() {
+    _this.context.fillStyle = "rgb(250, 250, 250)";
+    _this.context.drawImage(backgroundImage, 0, 0, document.width, document.height);
+    _this.context.fonts = "5px helvetica";
+    _this.context.fillText("404 page not found",10,50);
+  }
+
+  this.drawCats = function() {
+    _this.userCat.draw();
+  }
+
+  this.drawPizzas = function() {
+    for(var i=0; i< _this.pizzas.length; i++){
+      _this.pizzas[i].draw();
+    }
+  }
+
+  this.drawLazors = function() {
+    for(var i=0; i< _this.userCat.lazors.length; i++){
+      _this.userCat.lazors[i].draw();
+    }
   }
 
   _this.initializeSpaceCats();
