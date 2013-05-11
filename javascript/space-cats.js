@@ -3,6 +3,8 @@
 
   this.debug = false;
 
+  this.lives = 3;
+
   this.pizzas = [];
   this.pizzaCount = 5;
   this.pizzaDefaultSpeed = 8;
@@ -504,17 +506,24 @@
 
   this.drawObjects = function() {
     _this.drawBackground();
-    _this.drawHud();
     _this.drawPizzas();
     _this.drawLazors();
     _this.drawCats();
+    _this.drawHud();
   }
 
   this.drawHud = function() {
     var healthBarWidth = 100,
       healthBarHeight = 20,
       healthBarPositionX = 10,
-      healthBarPositionY = 10;
+      healthBarPositionY = 10,
+      lifeMargin = 2,
+      livesOriginX = lifeMargin + 20,
+      livesOriginY = 80,
+      livesOffsetX = 0,
+      livesOffsetY = 0,
+      lifeWidth = 50,
+      lifeHeight = 30;
 
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.fillRect(healthBarPositionX-1, healthBarPositionY-1, healthBarWidth+2, healthBarHeight+2);
@@ -522,14 +531,21 @@
     _this.context.fillRect(healthBarPositionX, healthBarPositionY, healthBarWidth, healthBarHeight);
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.fonts = "5px helvetica";
-    _this.context.fillText("404 page not found",161,100);
     _this.context.fillText("HP",healthBarPositionX+3, healthBarPositionY+(healthBarHeight/2));
+
+    for( var i=0; i< _this.lives; i++) {
+      _this.drawRotatedImage(userImage,livesOriginX+livesOffsetX, livesOriginY+livesOffsetY, lifeWidth, lifeHeight, 270)
+      //_this.context.fillRect(livesOriginX+livesOffsetX, livesOriginY+livesOffsetY, lifeWidth, lifeHeight);
+      livesOffsetX += lifeWidth + lifeMargin;
+    }
   }
 
 
   this.drawBackground = function() {
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.drawImage(backgroundImage, 0, 0, document.width, document.height);
+    _this.context.fonts = "5px helvetica";
+    _this.context.fillText("404 page not found",361,200);
   }
 
   this.drawCats = function() {
