@@ -1,8 +1,10 @@
 (function() {
   var _this = this;
 
+  this.debug = false;
+
   this.pizzas = [];
-  this.pizzaCount = 25;
+  this.pizzaCount = 5;
   this.pizzaDefaultSpeed = 8;
 
   this.leftPressed = false;
@@ -197,7 +199,7 @@
       positionY: Math.floor(Math.random()*document.height),
       width: 80,
       height: 80,
-      rotation: Math.floor(Math.random() * 8)
+      rotation: 0
     },opts);
 
     this.init = function() {
@@ -323,40 +325,47 @@
   }
 
   this.collides = function(object1, object2) {
-    var radius1 = Math.min(object1.height, object1.width);
-    var radius2 = Math.min(object2.height, object2.width);
+    var radius1 = Math.min(object1.height, object1.width)/2;
+    var radius2 = Math.min(object2.height, object2.width)/2;
     var center1 = _this.findCenterOfRotatedRect(object1.positionX, object1.positionY, object1.width, object1.height, object1.angle);
     var center2 = _this.findCenterOfRotatedRect(object2.positionX, object2.positionY, object2.width, object2.height, object2.angle);
-    console.log(object1)
-    console.log(radius1)
-    console.log(center1)
-    console.log(object2)
-    console.log(radius2)
-    console.log(center2)
-    console.log(_this.distanceBetweenTwoPoints(center1.x, center1.y, center2.x, center2.y) )
-    console.log(radius1 + radius2) 
+    if(_this.debug == true) {
+      _this.context.fillStyle = "rgb(0, 250, 0)";
+      _this.context.beginPath();
+      _this.context.arc(center1.x, center1.y, radius1, 0, Math.PI*2); 
+      _this.context.closePath();
+      _this.context.fill();
+      _this.context.beginPath();
+      _this.context.arc(center2.x, center2.y, radius2, 0, Math.PI*2); 
+      _this.context.closePath();
+      _this.context.fill();
+      _this.context.fillStyle = "rgb(0, 0, 250)";
+      _this.context.fillRect((center1.x), (center1.y), 4, 4);
+      _this.context.fillRect((center2.x), (center2.y), 4, 4);
+      _this.context.fillStyle = "rgb(0, 250, 250)";
+      _this.context.fillRect((object1.positionX), (object1.positionY), 4, 4);
+      _this.context.fillRect((object2.positionX), (object2.positionY), 4, 4);
+    }
     if(_this.distanceBetweenTwoPoints(center1.x, center1.y, center2.x, center2.y) < radius1 + radius2) {
-      console.log('trueruereuueueueueue')
       return true;
     }
-    console.log('f')
     return false;
   }
 
   this.findCenterOfRotatedRect = function(x, y, width, height, angle_degrees) {
-    var angle_rad = angle_degrees * Math.PI / 180;
-    var cosa = Math.cos(angle_rad);
-    var sina = Math.sin(angle_rad);
-    var wp = width/2;
-    var hp = height/2;
-    return { x: ( x + wp * cosa - hp * sina ),
-             y: ( y + wp * sina + hp * cosa ) };
+    //var angle_rad = angle_degrees * Math.PI / 180;
+    //var cosa = Math.cos(angle_rad);
+    //var sina = Math.sin(angle_rad);
+    //var wp = width/2;
+    //var hp = height/2;
+    //return { x: ( x + wp * cosa - hp * sina ),
+    //         y: ( y + wp * sina + hp * cosa ) };
+    return {x: x + width/2, y: y + height/2};
   }
 
   this.distanceBetweenTwoPoints = function(x1,y1, x2,y2) { 
     var dx  = x1 - x2,
       dy = y1 - y2;
-      console.log( Math.sqrt( dx*dx + dy*dy ) )
     return Math.sqrt( dx*dx + dy*dy ); 
   }
 
@@ -378,9 +387,9 @@
   }
 
   this.loop = function() {
-    _this.checkCollisions();
     _this.moveObjects();
     _this.drawObjects();
+    _this.checkCollisions();
   }
 
   this.moveObjects = function() {
