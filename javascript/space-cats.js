@@ -71,7 +71,8 @@
       lazorsReady: true,
       lazors: [],
       hitPoints: 3,
-      damage: 5,
+      mass: 100.0,
+      damage: 5
     },opts);
 
     this.applyBindings = function() {
@@ -220,17 +221,20 @@
       height: 80,
       rotation: Math.floor(Math.random()*5),
       hitPoints: 5,
+      mass: 12.0,
       damage: 5,
       value: 1000
     },opts);
 
     this.init = function() {
+      self.speedX = self.velocity * Math.cos(self.angle* Math.PI / 180);
+      self.speedY = self.velocity * Math.sin(self.angle* Math.PI / 180);
       self.draw();
     }
 
     this.move = function() {      
-      self.positionX += self.velocity * Math.cos(self.angle* Math.PI / 180);
-      self.positionY += self.velocity * Math.sin(self.angle* Math.PI / 180);
+      self.positionX += self.speedX;
+      self.positionY += self.speedY;
       self.orientation += self.rotation;
 
       //wrap screen
@@ -271,8 +275,6 @@
         }));
         i++;
       } while (i < childSlices)
-      
-      //_this.pizzas.push(new Pizza({}));
     }
 
     this.collides = function(other_object) {
@@ -299,17 +301,20 @@
       height: 40,
       rotation: Math.floor(Math.random() * 8)-4,
       hitPoints: 5,
+      mass: 3.0,
       damage: 1,
       value: 250
     },opts);
 
     this.init = function() {
+      self.speedX = self.velocity * Math.cos(self.angle* Math.PI / 180);
+      self.speedY = self.velocity * Math.sin(self.angle* Math.PI / 180);
       self.draw();
     }
 
     this.move = function() {      
-      self.positionX += self.velocity * Math.cos(self.angle* Math.PI / 180);
-      self.positionY += self.velocity * Math.sin(self.angle* Math.PI / 180);
+      self.positionX += self.speedX;
+      self.positionY += self.speedY;
       self.orientation += self.rotation;
 
       //wrap screen
@@ -333,6 +338,7 @@
     }
 
     this.draw = function() {
+      console.log('drawing slice')
       _this.drawRotatedImage(sliceImage, self.positionX, self.positionY, self.width, self.height, self.orientation);
     }
 
@@ -531,7 +537,21 @@
           _this.userCat.lazors[j].kill();
         }
       }
+      // for(var k = 0; k < _this.pizzas.length; k++){
+      //   if(k != i){
+      //     if(_this.collides(_this.pizzas[i], _this.pizzas[k])){
+      //       _this.bounce(_this.pizzas[i], _this.pizzas[k]);
+      //     }
+      //   }
+      // }
     }
+  }
+
+  this.bounce = function(object1, object2) {
+    object1.speedX = (object1.speedX * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedX)) / (object1.mass + object2.mass);
+    object1.speedY = (object1.speedY * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedY)) / (object1.mass + object2.mass);
+    object2.speedX = (object2.speedX * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedX)) / (object1.mass + object2.mass);
+    object2.speedY = (object2.speedY * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedY)) / (object1.mass + object2.mass);
   }
 
   this.drawObjects = function() {
@@ -567,8 +587,7 @@
     _this.context.fillText("SCORE:" + _this.userScore, scorePositionX, scorePositionY);
 
     for( var i=0; i< _this.lives; i++) {
-      _this.drawRotatedImage(userImage,livesOriginX+livesOffsetX, livesOriginY+livesOffsetY,lifeWidth, lifeHeight, 270)
-      //_this.context.fillRect(livesOriginX+livesOffsetX, livesOriginY+livesOffsetY, lifeWidth, lifeHeight);
+      _this.drawRotatedImage(userImage,livesOriginX+livesOffsetX, livesOriginY+livesOffsetY,lifeWidth, lifeHeight, 270);
       livesOffsetX += lifeWidth + lifeMargin;
     }
   }
