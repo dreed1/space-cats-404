@@ -564,10 +564,13 @@
   }
 
   this.bounce = function(object1, object2) {
-    // object1.speedX = (object1.speedX * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedX)) / (object1.mass + object2.mass);
-    // object1.speedY = (object1.speedY * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedY)) / (object1.mass + object2.mass);
-    // object2.speedX = (object2.speedX * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedX)) / (object1.mass + object2.mass);
-    // object2.speedY = (object2.speedY * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedY)) / (object1.mass + object2.mass);
+    //this shit is out of control!s
+     // object1.speedX = (object1.speedX * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedX)) / (object1.mass + object2.mass);
+     // object1.speedY = (object1.speedY * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedY)) / (object1.mass + object2.mass);
+     // object2.speedX = (object2.speedX * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedX)) / (object1.mass + object2.mass);
+     // object2.speedY = (object2.speedY * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedY)) / (object1.mass + object2.mass);
+     // object1.move();
+     // object2.move();
   }
 
   this.drawObjects = function() {
@@ -596,7 +599,7 @@
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.fillRect(healthBarPositionX-1, healthBarPositionY-1, healthBarWidth+2, healthBarHeight+2);
     _this.context.fillStyle = "rgb(250,0,0)";
-    _this.context.fillRect(healthBarPositionX, healthBarPositionY, _this.userCat.hitPoints, healthBarHeight);
+    _this.context.fillRect(healthBarPositionX, healthBarPositionY, Math.max(0, _this.userCat.hitPoints), healthBarHeight);
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.fonts = "10pt helvetica";
     _this.context.fillText("HP",healthBarPositionX+3, healthBarPositionY+(healthBarHeight/2));
