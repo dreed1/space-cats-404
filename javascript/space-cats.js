@@ -3,6 +3,7 @@
 
   this.debug = false;
 
+  this.gameInPlay = true;
   this.lives = 3;
 
   this.pizzas = [];
@@ -22,6 +23,13 @@
     pizzaReady = true;
   };
   pizzaImage.src = "images/pizza.png";
+
+  var sliceReady = false;
+  var sliceImage = new Image();
+  sliceImage.onload = function () {
+    sliceReady = true;
+  };
+  sliceImage.src = "images/pizza-slice.png";
 
   var userReady = false;
   var userImage = new Image();
@@ -60,7 +68,9 @@
       lazorRechargeTime: 100, //milliseconds
       lazorDefaultVelocity: 10,
       lazorsReady: true,
-      lazors: []
+      lazors: [],
+      hitPoints: 3,
+      damage: 5
     },opts);
 
     this.applyBindings = function() {
@@ -175,8 +185,8 @@
         function fireLazor() {
           self.lazors.push(new Lazor({
             angle: self.angle,
-            positionX: self.positionX,
-            positionY: self.positionY,
+            positionX: self.positionX + self.width/2,
+            positionY: self.positionY + self.height/2,
             velocity: self.velocity + self.lazorDefaultVelocity
           }));
         }
@@ -185,6 +195,10 @@
 
     this.draw = function() {
       _this.drawRotatedImage(userImage, self.positionX, self.positionY, self.width, self.height, self.angle);
+    }
+
+    this.kill = function() {
+      _this.userCat = new User();
     }
   }
 
@@ -197,12 +211,15 @@
 
     $.extend(this, {
       velocity: _this.pizzaDefaultSpeed,
-      angle: Math.floor(Math.random()*360),
+      angle: Math.floor(Math.random()*360), //angle of velocity
+      orientation: Math.floor(Math.random()*360), //directional orientation
       positionX: Math.floor(Math.random()*document.width),
       positionY: Math.floor(Math.random()*document.height),
       width: 80,
       height: 80,
-      rotation: 0
+      rotation: Math.floor(Math.random()*5),
+      hitPoints: 5,
+      damage: 5
     },opts);
 
     this.init = function() {
@@ -212,7 +229,7 @@
     this.move = function() {      
       self.positionX += self.velocity * Math.cos(self.angle* Math.PI / 180);
       self.positionY += self.velocity * Math.sin(self.angle* Math.PI / 180);
-      //self.angle += self.rotation;
+      self.orientation += self.rotation;
 
       //wrap screen
       leftMargin = self.positionX,
@@ -235,8 +252,8 @@
     }
 
     this.draw = function() {
-      //_this.drawRotatedImage(pizzaImage, self.positionX, self.positionY, self.width, self.height, self.angle);
-      _this.context.drawImage(pizzaImage, self.positionX, self.positionY, self.width, self.height);
+      _this.drawRotatedImage(pizzaImage, self.positionX, self.positionY, self.width, self.height, self.orientation);
+      
     }
 
     this.kill = function() {
@@ -271,12 +288,15 @@
 
     $.extend(this, {
       velocity: _this.pizzaSliceDefaultSpeed,
-      angle: Math.floor(Math.random()*360),
+      angle: Math.floor(Math.random()*360), //angle of velocity
+      orientation: Math.floor(Math.random()*360), //directional orientation
       positionX: Math.floor(Math.random()*document.width),
       positionY: Math.floor(Math.random()*document.height),
       width: 40,
       height: 40,
-      rotation: 0
+      rotation: Math.floor(Math.random() * 8)-4,
+      hitPoints: 5,
+      damage: 1
     },opts);
 
     this.init = function() {
@@ -286,7 +306,7 @@
     this.move = function() {      
       self.positionX += self.velocity * Math.cos(self.angle* Math.PI / 180);
       self.positionY += self.velocity * Math.sin(self.angle* Math.PI / 180);
-      //self.angle += self.rotation;
+      self.orientation += self.rotation;
 
       //wrap screen
       leftMargin = self.positionX,
@@ -309,8 +329,7 @@
     }
 
     this.draw = function() {
-      //_this.drawRotatedImage(pizzaImage, self.positionX, self.positionY, self.width, self.height, self.angle);
-      _this.context.drawImage(pizzaImage, self.positionX, self.positionY, self.width, self.height);
+      _this.drawRotatedImage(sliceImage, self.positionX, self.positionY, self.width, self.height, self.orientation);
     }
 
     this.kill = function() {
@@ -338,7 +357,8 @@
       positionX: 0,
       positionY: 0,
       width: 10,
-      height: 2
+      height: 2,
+      damage: 5
     },opts);
 
     this.init = function() {
@@ -448,7 +468,7 @@
 
   this.drawRotatedImage = function(image, x, y, width, height, angle) {   
     _this.context.save(); 
-    _this.context.translate(x, y);
+    _this.context.translate(x+(width/2), y+(height/2));
     _this.context.rotate(angle * Math.PI/180);
     _this.context.drawImage(image, -(width/2), -(height/2), width, height);
     _this.context.restore(); 
@@ -467,6 +487,7 @@
     _this.moveObjects();
     _this.drawObjects();
     _this.checkCollisions();
+    _this.gameInPlay = _this.maintainUser();
   }
 
   this.moveObjects = function() {
@@ -495,6 +516,10 @@
 
   this.checkCollisions = function() {
     for(var i = 0; i < _this.pizzas.length; i++){
+      if(_this.collides(_this.pizzas[i], _this.userCat)){
+        _this.userCat.hitPoints -= _this.pizzas[i].damage;
+        _this.pizzas[i].kill();
+      }
       for(var j = 0; j < _this.userCat.lazors.length; j++){
         if(_this.collides(_this.pizzas[i], _this.userCat.lazors[j])) {
           _this.pizzas[i].kill();
@@ -528,13 +553,13 @@
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.fillRect(healthBarPositionX-1, healthBarPositionY-1, healthBarWidth+2, healthBarHeight+2);
     _this.context.fillStyle = "rgb(250,0,0)";
-    _this.context.fillRect(healthBarPositionX, healthBarPositionY, healthBarWidth, healthBarHeight);
+    _this.context.fillRect(healthBarPositionX, healthBarPositionY, _this.userCat.hitPoints*2, healthBarHeight);
     _this.context.fillStyle = "rgb(250, 250, 250)";
-    _this.context.fonts = "5px helvetica";
+    _this.context.fonts = "10px helvetica";
     _this.context.fillText("HP",healthBarPositionX+3, healthBarPositionY+(healthBarHeight/2));
 
     for( var i=0; i< _this.lives; i++) {
-      _this.drawRotatedImage(userImage,livesOriginX+livesOffsetX, livesOriginY+livesOffsetY, lifeWidth, lifeHeight, 270)
+      _this.drawRotatedImage(userImage,livesOriginX+livesOffsetX, livesOriginY+livesOffsetY,lifeWidth, lifeHeight, 270)
       //_this.context.fillRect(livesOriginX+livesOffsetX, livesOriginY+livesOffsetY, lifeWidth, lifeHeight);
       livesOffsetX += lifeWidth + lifeMargin;
     }
@@ -564,9 +589,28 @@
     }
   }
 
+  this.maintainUser = function() {
+    if(_this.userCat.hitPoints < 0){
+      _this.lives -= 1;
+      if(_this.lives > 0){
+        _this.userCat = new User();
+      }
+      else {
+        _this.gameOver(); 
+        return false; 
+      }
+    }
+    return true;
+  }
+
+  this.gameOver = function() {
+    console.log('game over');
+  }
+
   _this.initializeSpaceCats();
 
   setInterval(function() {
+    if(_this.gameInPlay){}
     _this.loop();
   },33);//30 times a second
 })();
