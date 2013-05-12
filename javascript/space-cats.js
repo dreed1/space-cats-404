@@ -4,10 +4,11 @@
   this.debug = false;
 
   this.gameInPlay = true;
+  this.userScore = 0;
   this.lives = 3;
 
   this.pizzas = [];
-  this.pizzaCount = 5;
+  this.pizzaCount = 10;
   this.pizzaDefaultSpeed = 8;
   this.pizzaSliceDefaultSpeed = 12;
 
@@ -70,7 +71,7 @@
       lazorsReady: true,
       lazors: [],
       hitPoints: 3,
-      damage: 5
+      damage: 5,
     },opts);
 
     this.applyBindings = function() {
@@ -219,7 +220,8 @@
       height: 80,
       rotation: Math.floor(Math.random()*5),
       hitPoints: 5,
-      damage: 5
+      damage: 5,
+      value: 1000
     },opts);
 
     this.init = function() {
@@ -257,10 +259,11 @@
     }
 
     this.kill = function() {
+      _this.userScore += self.value;
       var index = _this.pizzas.indexOf(self);
       _this.pizzas.splice(index,1);
       var childSlices = Math.max(3, Math.floor(Math.random()*8)),
-        i= 0;
+        i = 0;
       do {
         _this.pizzas.push(new PizzaSlice({
           positionX: self.positionX,
@@ -296,7 +299,8 @@
       height: 40,
       rotation: Math.floor(Math.random() * 8)-4,
       hitPoints: 5,
-      damage: 1
+      damage: 1,
+      value: 250
     },opts);
 
     this.init = function() {
@@ -333,6 +337,7 @@
     }
 
     this.kill = function() {
+      _this.userScore += self.value;
       var index = _this.pizzas.indexOf(self);
       _this.pizzas.splice(index,1);
       //_this.pizzas.push(new Pizza({}));
@@ -542,6 +547,8 @@
       healthBarHeight = 20,
       healthBarPositionX = 10,
       healthBarPositionY = 10,
+      scorePositionX = document.width - 150,
+      scorePositionY = 50,
       lifeMargin = 2,
       livesOriginX = lifeMargin + 20,
       livesOriginY = 80,
@@ -555,8 +562,9 @@
     _this.context.fillStyle = "rgb(250,0,0)";
     _this.context.fillRect(healthBarPositionX, healthBarPositionY, _this.userCat.hitPoints*2, healthBarHeight);
     _this.context.fillStyle = "rgb(250, 250, 250)";
-    _this.context.fonts = "10px helvetica";
+    _this.context.fonts = "10pt helvetica";
     _this.context.fillText("HP",healthBarPositionX+3, healthBarPositionY+(healthBarHeight/2));
+    _this.context.fillText("SCORE:" + _this.userScore, scorePositionX, scorePositionY);
 
     for( var i=0; i< _this.lives; i++) {
       _this.drawRotatedImage(userImage,livesOriginX+livesOffsetX, livesOriginY+livesOffsetY,lifeWidth, lifeHeight, 270)
@@ -570,7 +578,7 @@
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.drawImage(backgroundImage, 0, 0, document.width, document.height);
     _this.context.fonts = "5px helvetica";
-    _this.context.fillText("404 page not found",361,200);
+    _this.context.fillText("404 - page not found, sucka",361,200);
   }
 
   this.drawCats = function() {
@@ -600,11 +608,13 @@
         return false; 
       }
     }
+    _this.userScore += 1;
     return true;
   }
 
   this.gameOver = function() {
-    console.log('game over');
+    _this.context.fonts = "80pt helvetica";
+    _this.context.fillText("GAME OVER",document.width/2,document.height/2);
   }
 
   _this.initializeSpaceCats();
