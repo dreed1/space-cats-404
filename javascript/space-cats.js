@@ -4,6 +4,7 @@
   this.debug = false;
 
   this.gameInPlay = true;
+  this.creatingPizzas = false;
   this.userScore = 0;
   this.lives = 3;
 
@@ -70,55 +71,11 @@
       lazorDefaultVelocity: 10,
       lazorsReady: true,
       lazors: [],
-      hitPoints: 3,
+      hitPoints: 100,
       mass: 100.0,
       damage: 5
     },opts);
 
-    this.applyBindings = function() {
-      $(document).keydown(function (e) {
-        var keyCode = e.keyCode || e.which,
-          arrow = {left: 37, up: 38, right: 39, down: 40 };
-        switch (keyCode) {
-          case arrow.left:
-            _this.leftPressed = true;
-          break;
-          case arrow.up:
-            _this.upPressed = true;
-          break;
-          case arrow.right:
-            _this.rightPressed = true;
-          break;
-          case arrow.down:
-            _this.downPressed = true;
-          break;
-        }
-        if(e.keyCode == 32) {
-          _this.firingLazors = true;
-        }
-      });
-      $(document).keyup(function (e) {
-        var keyCode = e.keyCode || e.which,
-          arrow = {left: 37, up: 38, right: 39, down: 40 };
-        switch (keyCode) {
-          case arrow.left:
-            _this.leftPressed = false;
-          break;
-          case arrow.up:
-            _this.upPressed = false;
-          break;
-          case arrow.right:
-            _this.rightPressed = false;
-          break;
-          case arrow.down:
-            _this.downPressed = false;
-          break;
-        }
-        if(e.keyCode == 32) {
-          _this.firingLazors = false;
-        }
-      });
-    }
     this.move = function() {
       handleTurning();
       handleVelocity();
@@ -263,7 +220,7 @@
     }
 
     this.kill = function() {
-      _this.userScore += self.value;
+      if(_this.gameInPlay) _this.userScore += self.value;
       var index = _this.pizzas.indexOf(self);
       _this.pizzas.splice(index,1);
       var childSlices = Math.max(3, Math.floor(Math.random()*8)),
@@ -338,12 +295,11 @@
     }
 
     this.draw = function() {
-      console.log('drawing slice')
       _this.drawRotatedImage(sliceImage, self.positionX, self.positionY, self.width, self.height, self.orientation);
     }
 
     this.kill = function() {
-      _this.userScore += self.value;
+      if(_this.gameInPlay) _this.userScore += self.value;
       var index = _this.pizzas.indexOf(self);
       _this.pizzas.splice(index,1);
       //_this.pizzas.push(new Pizza({}));
@@ -390,7 +346,7 @@
       }
     }
     this.draw = function() {
-      _this.drawRotatedRect(self.positionX, self.positionY, self.width, self.height, self.angle);
+      _this.drawRotatedRect("rgb(250, 0, 0)", self.positionX, self.positionY, self.width, self.height, self.angle);
     }
 
     this.kill = function() {
@@ -422,14 +378,68 @@
   }
 
   this.createPizzas = function() {
+    _this.creatingPizzas = true;
     for(var i=0; i< _this.pizzaCount ; i++) {
       _this.pizzas.push(new Pizza({}));
     }
+    _this.creatingPizzas = false;
   }
 
   this.applyBindings = function() {
-    //apply bindings to control your space cat with arrow keys
-    _this.userCat.applyBindings();
+      $(document).keydown(function (e) {
+        var keyCode = e.keyCode || e.which,
+          arrow = {left: 37, up: 38, right: 39, down: 40 };
+        switch (keyCode) {
+          case arrow.left:
+            _this.leftPressed = true;
+          break;
+          case arrow.up:
+            _this.upPressed = true;
+          break;
+          case arrow.right:
+            _this.rightPressed = true;
+          break;
+          case arrow.down:
+            _this.downPressed = true;
+          break;
+        }
+        if(e.keyCode == 32) {
+          _this.firingLazors = true;
+        }
+      });
+      $(document).keyup(function (e) {
+        var keyCode = e.keyCode || e.which,
+          arrow = {left: 37, up: 38, right: 39, down: 40 };
+        switch (keyCode) {
+          case arrow.left:
+            _this.leftPressed = false;
+          break;
+          case arrow.up:
+            _this.upPressed = false;
+          break;
+          case arrow.right:
+            _this.rightPressed = false;
+          break;
+          case arrow.down:
+            _this.downPressed = false;
+          break;
+        }
+        if(e.keyCode == 32) {
+          _this.firingLazors = false;
+        }
+        if(e.keyCode == 188) {
+          _this.toggleDebug();
+        }
+      });
+    }
+
+  this.toggleDebug = function() {
+    if(_this.debug){
+      _this.debug = false;
+    }
+    else {
+      _this.debug = true;
+    }
   }
 
   this.collides = function(object1, object2) {
@@ -485,9 +495,9 @@
     _this.context.restore(); 
   }
 
-  this.drawRotatedRect = function(x, y, width, height, angle) {   
+  this.drawRotatedRect = function(color, x, y, width, height, angle) {   
     _this.context.save(); 
-    _this.context.fillStyle = "rgb(250, 0, 0)";
+    _this.context.fillStyle = color;
     _this.context.translate(x, y);
     _this.context.rotate(angle * Math.PI/180);
     _this.context.fillRect(-(width/2), -(height/2), width, height);
@@ -537,21 +547,27 @@
           _this.userCat.lazors[j].kill();
         }
       }
-      // for(var k = 0; k < _this.pizzas.length; k++){
-      //   if(k != i){
-      //     if(_this.collides(_this.pizzas[i], _this.pizzas[k])){
-      //       _this.bounce(_this.pizzas[i], _this.pizzas[k]);
-      //     }
-      //   }
-      // }
+      for(var k = 0; k < _this.pizzas.length; k++){
+        if(k != i){
+          if(_this.collides(_this.pizzas[i], _this.pizzas[k])){
+            _this.bounce(_this.pizzas[i], _this.pizzas[k]);
+          }
+        }
+      }
+    }
+    if(!_this.pizzas.length && !_this.creatingPizzas) {
+      _this.creatingPizzas = true;
+      setTimeout(function() {
+        _this.createPizzas();
+      }, 3000);
     }
   }
 
   this.bounce = function(object1, object2) {
-    object1.speedX = (object1.speedX * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedX)) / (object1.mass + object2.mass);
-    object1.speedY = (object1.speedY * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedY)) / (object1.mass + object2.mass);
-    object2.speedX = (object2.speedX * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedX)) / (object1.mass + object2.mass);
-    object2.speedY = (object2.speedY * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedY)) / (object1.mass + object2.mass);
+    // object1.speedX = (object1.speedX * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedX)) / (object1.mass + object2.mass);
+    // object1.speedY = (object1.speedY * (object1.mass - object2.mass) + (2 * object2.mass * object2.speedY)) / (object1.mass + object2.mass);
+    // object2.speedX = (object2.speedX * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedX)) / (object1.mass + object2.mass);
+    // object2.speedY = (object2.speedY * (object2.mass - object1.mass) + (2 * object1.mass * object1.speedY)) / (object1.mass + object2.mass);
   }
 
   this.drawObjects = function() {
@@ -580,7 +596,7 @@
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.fillRect(healthBarPositionX-1, healthBarPositionY-1, healthBarWidth+2, healthBarHeight+2);
     _this.context.fillStyle = "rgb(250,0,0)";
-    _this.context.fillRect(healthBarPositionX, healthBarPositionY, _this.userCat.hitPoints*2, healthBarHeight);
+    _this.context.fillRect(healthBarPositionX, healthBarPositionY, _this.userCat.hitPoints, healthBarHeight);
     _this.context.fillStyle = "rgb(250, 250, 250)";
     _this.context.fonts = "10pt helvetica";
     _this.context.fillText("HP",healthBarPositionX+3, healthBarPositionY+(healthBarHeight/2));
@@ -627,7 +643,7 @@
         return false; 
       }
     }
-    _this.userScore += 1;
+    if(_this.gameInPlay) _this.userScore += 1;
     return true;
   }
 
