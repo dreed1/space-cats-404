@@ -33,6 +33,13 @@
   };
   sliceImage.src = "images/pizza-slice.png";
 
+  var explosionReady = false;
+  var explosionImage = new Image();
+  explosionImage.onload = function () {
+    explosionReady = true;
+  };
+  explosionImage.src = "images/explosion.png";
+
   var userReady = false;
   var userImage = new Image();
   userImage.onload = function () {
@@ -260,7 +267,9 @@
       hitPoints: 5,
       mass: 3.0,
       damage: 1,
-      value: 250
+      value: 250,
+      image: sliceImage,
+      dead: false
     },opts);
 
     this.init = function() {
@@ -295,14 +304,19 @@
     }
 
     this.draw = function() {
-      _this.drawRotatedImage(sliceImage, self.positionX, self.positionY, self.width, self.height, self.orientation);
+      _this.drawRotatedImage(self.image, self.positionX, self.positionY, self.width, self.height, self.orientation);
     }
 
     this.kill = function() {
-      if(_this.gameInPlay) _this.userScore += self.value;
-      var index = _this.pizzas.indexOf(self);
-      _this.pizzas.splice(index,1);
-      //_this.pizzas.push(new Pizza({}));
+      if(!self.dead){
+        self.dead = true;
+        if(_this.gameInPlay) _this.userScore += self.value;
+        self.image = explosionImage;
+        setTimeout(function() {
+          var index = _this.pizzas.indexOf(self);
+          _this.pizzas.splice(index,1);
+        }, 250);
+      }
     }
 
     this.collides = function(other_object) {
