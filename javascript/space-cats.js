@@ -19,6 +19,9 @@
   this.downPressed = false;
   this.firingLazors = false;
 
+  this.gameWidth = 0;
+  this.gameHeight = 0;
+
   var pizzaReady = false;
   var pizzaImage = new Image();
   pizzaImage.onload = function () {
@@ -70,8 +73,8 @@
       angle: 270,
       speedX: 0,
       speedY: 0,
-      positionX: document.width/2,
-      positionY: document.height/2,
+      positionX: _this.gameWidth/2,
+      positionY: _this.gameHeight/2,
       width: 130,
       height: 70,
       lazorRechargeTime: 100, //milliseconds
@@ -122,8 +125,8 @@
         var leftMargin = self.positionX,
         topMargin = self.positionY,
         userHeight = Math.max(self.height, self.width)
-        screenWidth = document.width,
-        screenHeight = document.height;
+        screenWidth = _this.gameWidth,
+        screenHeight = _this.gameHeight;
         if(leftMargin > screenWidth + userHeight) {
           self.positionX = -userHeight;
         }
@@ -179,8 +182,8 @@
       velocity: _this.pizzaDefaultSpeed,
       angle: Math.floor(Math.random()*360), //angle of velocity
       orientation: Math.floor(Math.random()*360), //directional orientation
-      positionX: Math.floor(Math.random()*document.width),
-      positionY: Math.floor(Math.random()*document.height),
+      positionX: Math.floor(Math.random()*_this.gameWidth),
+      positionY: Math.floor(Math.random()*_this.gameHeight),
       width: 80,
       height: 80,
       rotation: Math.floor(Math.random()*5),
@@ -205,8 +208,8 @@
       leftMargin = self.positionX,
       topMargin = self.positionY,
       pizzaDiameter = self.height,
-      screenWidth = document.width,
-      screenHeight = document.height;
+      screenWidth = _this.gameWidth,
+      screenHeight = _this.gameHeight;
       if(leftMargin > screenWidth + pizzaDiameter) {
         self.positionX =  -pizzaDiameter;
       }
@@ -259,8 +262,8 @@
       velocity: _this.pizzaSliceDefaultSpeed,
       angle: Math.floor(Math.random()*360), //angle of velocity
       orientation: Math.floor(Math.random()*360), //directional orientation
-      positionX: Math.floor(Math.random()*document.width),
-      positionY: Math.floor(Math.random()*document.height),
+      positionX: Math.floor(Math.random()*_this.gameWidth),
+      positionY: Math.floor(Math.random()*_this.gameHeight),
       width: 40,
       height: 40,
       rotation: Math.floor(Math.random() * 8)-4,
@@ -287,8 +290,8 @@
       leftMargin = self.positionX,
       topMargin = self.positionY,
       pizzaDiameter = self.height,
-      screenWidth = document.width,
-      screenHeight = document.height;
+      screenWidth = _this.gameWidth,
+      screenHeight = _this.gameHeight;
       if(leftMargin > screenWidth + pizzaDiameter) {
         self.positionX =  -pizzaDiameter;
       }
@@ -353,8 +356,8 @@
       //kill it if it gets off screen
       leftMargin = self.positionX,
       topMargin = self.positionY,
-      screenWidth = document.width,
-      screenHeight = document.height;
+      screenWidth = _this.gameWidth,
+      screenHeight = _this.gameHeight;
       if((leftMargin > screenWidth || topMargin > screenHeight || leftMargin < 0 || topMargin < 0)) {
         self.kill();
       }
@@ -383,9 +386,11 @@
     _this.userCat = new User();
     _this.applyBindings();
     $(document).ready(function() {
+      _this.gameWidth = document.body.clientWidth;
+      _this.gameHeight = document.body.clientHeight;
       _this.canvas = document.getElementById('space-canvas');
-      _this.canvas.height = document.height;
-      _this.canvas.width = document.width;
+      _this.canvas.height = _this.gameHeight;
+      _this.canvas.width = _this.gameWidth;
       _this.context = canvas.getContext('2d');
       _this.createPizzas();
     });
@@ -600,7 +605,7 @@
       healthBarHeight = 20,
       healthBarPositionX = 10,
       healthBarPositionY = 10,
-      scorePositionX = document.width - 150,
+      scorePositionX = _this.gameWidth - 150,
       scorePositionY = 50,
       lifeMargin = 2,
       livesOriginX = lifeMargin + 20,
@@ -628,7 +633,7 @@
 
   this.drawBackground = function() {
     _this.context.fillStyle = "rgb(250, 250, 250)";
-    _this.context.drawImage(backgroundImage, 0, 0, document.width, document.height);
+    _this.context.drawImage(backgroundImage, 0, 0, _this.gameWidth, _this.gameHeight);
     _this.context.fonts = "5px helvetica";
     _this.context.fillText("404 - page not found, sucka",361,200);
   }
@@ -666,7 +671,7 @@
 
   this.gameOver = function() {
     _this.context.fonts = "80pt helvetica";
-    _this.context.fillText("GAME OVER",document.width/2,document.height/2);
+    _this.context.fillText("GAME OVER",_this.gameWidth/2,_this.gameHeight/2);
   }
 
   _this.initializeSpaceCats();
