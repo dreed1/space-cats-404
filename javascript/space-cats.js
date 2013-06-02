@@ -405,6 +405,26 @@
   }
 
   this.applyBindings = function() {
+      $('#space-canvas').bind('touchstart', function(event){
+        console.log('touch started')
+        console.log(event)
+      })
+      $('#space-canvas').bind('touchend', function(event){
+        console.log('touch ended')
+        console.log(event)
+      })
+      $('#space-canvas').bind('touchcancel', function(event){
+        console.log('touch cancelled')
+        console.log(event)
+      })
+      $('#space-canvas').bind('touchleave', function(event){
+        console.log('touch left')
+        console.log(event)
+      })
+      $('#space-canvas').bind('touchmove', function(event){
+        console.log('touch moved')
+        console.log(event)
+      })
       $(document).keydown(function (e) {
         var keyCode = e.keyCode || e.which,
           arrow = {left: 37, up: 38, right: 39, down: 40 };
