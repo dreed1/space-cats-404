@@ -19,6 +19,9 @@
   this.downPressed = false;
   this.firingLazors = false;
 
+  this.touchX = 0;
+  this.touchY = 0;
+
   this.gameWidth = 0;
   this.gameHeight = 0;
 
@@ -70,7 +73,7 @@
       acceleration: 0.7,
       brakeCoefficient: 0.95,
       turnSpeed: 9,
-      angle: 270,
+      angle: 0,
       speedX: 0,
       speedY: 0,
       positionX: _this.gameWidth/2,
@@ -87,11 +90,36 @@
     },opts);
 
     this.move = function() {
+      handleTouch();
       handleTurning();
       handleVelocity();
       moveCat();
       wrapScreen();
       fireLazors();
+
+      function handleTouch() {
+        if(_this.touchX != 0 && _this.touchY != 0) {
+          var dy = _this.touchY - (self.positionY + self.height/2);
+          var dx = _this.touchX - (self.positionX + self.width/2);
+          var minimumTurnThreshold = 5;
+          var rads = Math.atan2(dy, dx);
+          var touchAngle = rads * 180/Math.PI // rads to degs
+          var lineDistance = _this.distanceBetweenTwoPoints(_this.touchX, _this.touchY, self.positionX + self.width/2, self.positionY + self.height/2);
+          // console.log(touchAngle);
+          // console.log(self.angle)
+          // console.log(lineDistance);
+          self.velocity += self.acceleration * (lineDistance / Math.min(_this.gameWidth, _this.gameHeight));
+
+          if(Math.abs(self.angle - touchAngle) > minimumTurnThreshold ) {
+            if(touchAngle >= self.angle && touchAngle < (self.angle + 180) % 360) {
+              self.angle += self.turnSpeed/2;
+            }
+            else {
+              self.angle -= self.turnSpeed/2;
+            }
+          }
+        }
+      }
 
       function handleTurning() {
         if(_this.leftPressed) {
@@ -405,72 +433,84 @@
   }
 
   this.applyBindings = function() {
-      $('#space-canvas').bind('touchstart', function(event){
-        console.log('touch started')
-        console.log(event)
-      })
-      $('#space-canvas').bind('touchend', function(event){
-        console.log('touch ended')
-        console.log(event)
-      })
-      $('#space-canvas').bind('touchcancel', function(event){
-        console.log('touch cancelled')
-        console.log(event)
-      })
-      $('#space-canvas').bind('touchleave', function(event){
-        console.log('touch left')
-        console.log(event)
-      })
-      $('#space-canvas').bind('touchmove', function(event){
-        console.log('touch moved')
-        console.log(event)
-      })
-      $(document).keydown(function (e) {
-        var keyCode = e.keyCode || e.which,
-          arrow = {left: 37, up: 38, right: 39, down: 40 };
-        switch (keyCode) {
-          case arrow.left:
-            _this.leftPressed = true;
-          break;
-          case arrow.up:
-            _this.upPressed = true;
-          break;
-          case arrow.right:
-            _this.rightPressed = true;
-          break;
-          case arrow.down:
-            _this.downPressed = true;
-          break;
-        }
-        if(e.keyCode == 32) {
-          _this.firingLazors = true;
-        }
-      });
-      $(document).keyup(function (e) {
-        var keyCode = e.keyCode || e.which,
-          arrow = {left: 37, up: 38, right: 39, down: 40 };
-        switch (keyCode) {
-          case arrow.left:
-            _this.leftPressed = false;
-          break;
-          case arrow.up:
-            _this.upPressed = false;
-          break;
-          case arrow.right:
-            _this.rightPressed = false;
-          break;
-          case arrow.down:
-            _this.downPressed = false;
-          break;
-        }
-        if(e.keyCode == 32) {
-          _this.firingLazors = false;
-        }
-        if(e.keyCode == 188) {
-          _this.toggleDebug();
-        }
-      });
-    }
+    $(document).bind('touchstart', function(event){
+      _this.handleTouchStart(event);
+    });
+    $(document).bind('touchmove', function(event){
+      _this.handleTouchMove(event);
+    });
+    $(document).bind('touchend', function(event){
+      _this.handleTouchEnd(event);
+    });
+
+    $(document).keydown(function (e) {
+      var keyCode = e.keyCode || e.which,
+        arrow = {left: 37, up: 38, right: 39, down: 40 };
+      switch (keyCode) {
+        case arrow.left:
+          _this.leftPressed = true;
+        break;
+        case arrow.up:
+          _this.upPressed = true;
+        break;
+        case arrow.right:
+          _this.rightPressed = true;
+        break;
+        case arrow.down:
+          _this.downPressed = true;
+        break;
+      }
+      if(e.keyCode == 32) {
+        _this.firingLazors = true;
+      }
+    });
+    $(document).keyup(function (e) {
+      var keyCode = e.keyCode || e.which,
+        arrow = {left: 37, up: 38, right: 39, down: 40 };
+      switch (keyCode) {
+        case arrow.left:
+          _this.leftPressed = false;
+        break;
+        case arrow.up:
+          _this.upPressed = false;
+        break;
+        case arrow.right:
+          _this.rightPressed = false;
+        break;
+        case arrow.down:
+          _this.downPressed = false;
+        break;
+      }
+      if(e.keyCode == 32) {
+        _this.firingLazors = false;
+      }
+      if(e.keyCode == 188) {
+        _this.toggleDebug();
+      }
+    });
+  }
+
+  this.handleTouchStart = function(event) {
+    _this.handleTouchEvent(event);
+  }
+
+  this.handleTouchMove = function(event) {
+    _this.handleTouchEvent(event);
+  }
+
+  this.handleTouchEnd = function(event) {
+    _this.touchX = 0;
+    _this.touchY = 0;
+    //_this.handleTouchEvent(event);
+  }
+
+  this.handleTouchEvent = function(event) {
+    var xPos = event.originalEvent.touches[0].pageX;
+    var yPos = event.originalEvent.touches[0].pageY;
+
+    _this.touchX = xPos;
+    _this.touchY = yPos;
+  }
 
   this.toggleDebug = function() {
     if(_this.debug){
@@ -675,6 +715,7 @@
   }
 
   this.maintainUser = function() {
+    if(_this.userCat.angle > 360) _this.userCat.angle = _this.userCat.angle % 360 ;
     if(_this.userCat.hitPoints < 0){
       _this.lives -= 1;
       if(_this.lives > 0){
