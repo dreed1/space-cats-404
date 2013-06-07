@@ -72,7 +72,7 @@
       maximumVelocity: 30,
       acceleration: 0.7,
       brakeCoefficient: 0.95,
-      turnSpeed: 7,
+      turnSpeed: 9,
       angle: 0,
       speedX: 0,
       speedY: 0,
@@ -106,9 +106,6 @@
           var rads = Math.atan2(dy, dx);
           var touchAngle = ((rads * 180/Math.PI) + 360) % 360// rads to degs
           var lineDistance = _this.distanceBetweenTwoPoints(_this.touchX, _this.touchY, playerCenter.x, playerCenter.y);
-           console.log(touchAngle);
-           console.log(self.angle)
-          // console.log(lineDistance);
           self.velocity += self.acceleration * (lineDistance / Math.min(_this.gameWidth, _this.gameHeight));
 
           if(Math.abs(self.angle - touchAngle) > minimumTurnThreshold ) {
