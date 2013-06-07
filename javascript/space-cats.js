@@ -69,9 +69,9 @@
 
     $.extend(this, {
       velocity: 0,
-      maximumVelocity: 30,
-      acceleration: 0.7,
-      brakeCoefficient: 0.95,
+      maximumVelocity: 60,
+      acceleration: 0.9,
+      brakeCoefficient: 0.99,
       turnSpeed: 9,
       angle: 0,
       speedX: 0,
@@ -106,7 +106,7 @@
           var rads = Math.atan2(dy, dx);
           var touchAngle = ((rads * 180/Math.PI) + 360) % 360// rads to degs
           var lineDistance = _this.distanceBetweenTwoPoints(_this.touchX, _this.touchY, playerCenter.x, playerCenter.y);
-          self.velocity += self.acceleration * (lineDistance / Math.min(_this.gameWidth, _this.gameHeight));
+          self.velocity += self.acceleration * (2*(lineDistance / Math.min(_this.gameWidth, _this.gameHeight)));
 
           if(Math.abs(self.angle - touchAngle) > minimumTurnThreshold ) {
             if(shouldTurnLeft(self.angle, touchAngle)) {
@@ -419,7 +419,6 @@
   /*********************************************************************************/
 
   this.initializeSpaceCats = function() {
-    _this.userCat = new User();
     _this.applyBindings();
     $(document).ready(function() {
       _this.gameWidth = document.body.clientWidth;
@@ -428,6 +427,7 @@
       _this.canvas.height = _this.gameHeight;
       _this.canvas.width = _this.gameWidth;
       _this.context = canvas.getContext('2d');
+      _this.userCat = new User();
       _this.createPizzas();
     });
   }
