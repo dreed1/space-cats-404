@@ -72,7 +72,7 @@
       maximumVelocity: 30,
       acceleration: 0.7,
       brakeCoefficient: 0.95,
-      turnSpeed: 9,
+      turnSpeed: 7,
       angle: 0,
       speedX: 0,
       speedY: 0,
@@ -99,25 +99,36 @@
 
       function handleTouch() {
         if(_this.touchX != 0 && _this.touchY != 0) {
-          var dy = _this.touchY - (self.positionY + self.height/2);
-          var dx = _this.touchX - (self.positionX + self.width/2);
+          var playerCenter = _this.findCenterOfRotatedRect(_this.userCat.positionX, _this.userCat.positionY, _this.userCat.width, _this.userCat.height, _this.userCat.angle);
+          var dy = _this.touchY - playerCenter.y;
+          var dx = _this.touchX - playerCenter.x;
           var minimumTurnThreshold = 5;
           var rads = Math.atan2(dy, dx);
-          var touchAngle = rads * 180/Math.PI // rads to degs
-          var lineDistance = _this.distanceBetweenTwoPoints(_this.touchX, _this.touchY, self.positionX + self.width/2, self.positionY + self.height/2);
-          // console.log(touchAngle);
-          // console.log(self.angle)
+          var touchAngle = ((rads * 180/Math.PI) + 360) % 360// rads to degs
+          var lineDistance = _this.distanceBetweenTwoPoints(_this.touchX, _this.touchY, playerCenter.x, playerCenter.y);
+           console.log(touchAngle);
+           console.log(self.angle)
           // console.log(lineDistance);
           self.velocity += self.acceleration * (lineDistance / Math.min(_this.gameWidth, _this.gameHeight));
 
           if(Math.abs(self.angle - touchAngle) > minimumTurnThreshold ) {
-            if(touchAngle >= self.angle && touchAngle < (self.angle + 180) % 360) {
-              self.angle += self.turnSpeed/2;
+            if(shouldTurnLeft(self.angle, touchAngle)) {
+              self.angle -= self.turnSpeed;
             }
             else {
-              self.angle -= self.turnSpeed/2;
+              self.angle += self.turnSpeed;
             }
           }
+        }
+        function shouldTurnLeft(playerAngle, touchAngle) {
+          var result = false;
+          if(playerAngle >=0 && playerAngle < 180) {
+            result = !(playerAngle < touchAngle && (playerAngle + 180) % 360 > touchAngle);
+          }
+          else {
+            result = (playerAngle > touchAngle && (playerAngle + 180) % 360 < touchAngle);
+          }
+          return result;//touchAngle >= playerAngle && touchAngle < (playerAngle + 180) % 360
         }
       }
 
@@ -484,6 +495,7 @@
       if(e.keyCode == 32) {
         _this.firingLazors = false;
       }
+      //the comma key
       if(e.keyCode == 188) {
         _this.toggleDebug();
       }
@@ -658,6 +670,30 @@
     _this.drawLazors();
     _this.drawCats();
     _this.drawHud();
+    _this.drawDebug();
+  }
+
+  this.drawBackground = function() {
+    _this.context.fillStyle = "rgb(250, 250, 250)";
+    _this.context.drawImage(backgroundImage, 0, 0, _this.gameWidth, _this.gameHeight);
+    _this.context.fonts = "5px helvetica";
+    _this.context.fillText("404 - page not found, sucka",361,200);
+  }
+
+  this.drawCats = function() {
+    _this.userCat.draw();
+  }
+
+  this.drawPizzas = function() {
+    for(var i=0; i< _this.pizzas.length; i++){
+      _this.pizzas[i].draw();
+    }
+  }
+
+  this.drawLazors = function() {
+    for(var i=0; i< _this.userCat.lazors.length; i++){
+      _this.userCat.lazors[i].draw();
+    }
   }
 
   this.drawHud = function() {
@@ -690,32 +726,29 @@
     }
   }
 
+  this.drawDebug = function() {
+    if(_this.debug) {
+      if(_this.touchX > 0 && _this.touchY > 0) {
+        var playerCenter = _this.findCenterOfRotatedRect(_this.userCat.positionX, _this.userCat.positionY, _this.userCat.width, _this.userCat.height, _this.userCat.angle);
+        _this.context.fillStyle = "rgb(250, 0, 0)";
+        _this.context.beginPath();
+        _this.context.arc(_this.touchX, _this.touchY, 10, 0, Math.PI*2); 
+        _this.context.closePath();
+        _this.context.fill();
 
-  this.drawBackground = function() {
-    _this.context.fillStyle = "rgb(250, 250, 250)";
-    _this.context.drawImage(backgroundImage, 0, 0, _this.gameWidth, _this.gameHeight);
-    _this.context.fonts = "5px helvetica";
-    _this.context.fillText("404 - page not found, sucka",361,200);
-  }
-
-  this.drawCats = function() {
-    _this.userCat.draw();
-  }
-
-  this.drawPizzas = function() {
-    for(var i=0; i< _this.pizzas.length; i++){
-      _this.pizzas[i].draw();
-    }
-  }
-
-  this.drawLazors = function() {
-    for(var i=0; i< _this.userCat.lazors.length; i++){
-      _this.userCat.lazors[i].draw();
+        _this.context.strokeStyle = "rgb(145,145,0)";
+        _this.context.lineWidth = 5;
+        _this.context.beginPath();
+        _this.context.moveTo(_this.touchX, _this.touchY);
+        _this.context.lineTo(playerCenter.x, playerCenter.y);
+        _this.context.stroke();
+      }
     }
   }
 
   this.maintainUser = function() {
-    if(_this.userCat.angle > 360) _this.userCat.angle = _this.userCat.angle % 360 ;
+    if(_this.userCat.angle < 0) _this.userCat.angle += 360;
+    if(_this.userCat.angle >= 360) _this.userCat.angle = _this.userCat.angle % 360 ;
     if(_this.userCat.hitPoints < 0){
       _this.lives -= 1;
       if(_this.lives > 0){
