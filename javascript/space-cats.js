@@ -9,7 +9,7 @@
   this.lives = 3;
 
   this.pizzas = [];
-  this.pizzaCount = 10;
+  this.pizzaCount = 2;
   this.pizzaDefaultSpeed = 8;
   this.pizzaSliceDefaultSpeed = 12;
 
@@ -69,8 +69,8 @@
 
     $.extend(this, {
       velocity: 0,
-      maximumVelocity: 60,
-      acceleration: 0.9,
+      maximumVelocity: 40,
+      acceleration: 3,
       brakeCoefficient: 0.99,
       turnSpeed: 9,
       angle: 0,
@@ -145,7 +145,7 @@
         }
         if(_this.downPressed) {
           self.velocity -= self.acceleration;
-          if(self.velocity > self.maximumVelocity) self.velocity = self.maximumVelocity;
+          if(self.velocity < -self.maximumVelocity) self.velocity = -self.maximumVelocity;
         }
       }
 
