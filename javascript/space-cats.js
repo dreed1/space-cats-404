@@ -70,7 +70,7 @@
     $.extend(this, {
       velocity: 0,
       maximumVelocity: 40,
-      acceleration: 3,
+      acceleration: 1,
       brakeCoefficient: 0.99,
       turnSpeed: 9,
       angle: 0,
@@ -593,10 +593,12 @@
   }
 
   this.loop = function() {
-    _this.moveObjects();
-    _this.drawObjects();
-    _this.checkCollisions();
-    _this.gameInPlay = _this.maintainUser();
+    if (pizzaReady && sliceReady && explosionReady && backgroundReady && userReady) {
+      _this.moveObjects();
+      _this.drawObjects();
+      _this.checkCollisions();
+      _this.gameInPlay = _this.maintainUser();
+    }
   }
 
   this.moveObjects = function() {
